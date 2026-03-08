@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sub-20 5K</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Literata:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c10;
+  --surface: #0d1117;
+  --card: #111620;
+  --card2: #161c28;
+  --border: #1e2535;
+  --border2: #252d3e;
+  --green: #3dffa0;
+  --yellow: #ffe44a;
+  --orange: #ff7c3a;
+  --blue: #5b9fff;
+  --red: #ff4a6a;
+  --text: #e8edf5;
+  --muted: #5a6a85;
+  --muted2: #3a4a60;
+  --done-bg: #0a1a12;
+  --warn-bg: #1a0e0a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg); color: var(--text); font-family: 'Literata', Georgia, serif; min-height: 100vh; overflow-x: hidden; font-size: 15px; }
+
+.header { background: var(–surface); border-bottom: 1px solid var(–border); padding: 8px 16px 0; position: fixed; top: 0; left: 0; right: 0; z-index: 200; }
+body { padding-top: 88px; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 12px; }
+.brand h1 { font-family: ‘Barlow Condensed’, sans-serif; font-weight: 900; font-size: 1.5rem; letter-spacing: 3px; line-height: 1; color: var(–green); }
+.brand p { font-size: 0.6rem; color: var(–muted); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 1px; font-family: ‘Barlow Condensed’, sans-serif; }
+.header-meta { display: flex; align-items: center; gap: 8px; }
+.progress-wrap { position: relative; width: 42px; height: 42px; flex-shrink: 0; }
+.progress-wrap svg { width: 42px; height: 42px; }
+.ring-bg { fill: none; stroke: var(–border2); stroke-width: 3.5; }
+.ring-bar { fill: none; stroke: var(–green); stroke-width: 3.5; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; transform: rotate(-90deg); transform-origin: 50% 50%; }
+.ring-text { font-family: ‘Barlow Condensed’, sans-serif; font-size: 10px; font-weight: 700; fill: var(–green); dominant-baseline: middle; text-anchor: middle; }
+.race-countdown { text-align: right; }
+.race-countdown .days { font-family: ‘Barlow Condensed’, sans-serif; font-size: 1.2rem; font-weight: 700; color: var(–yellow); line-height: 1; }
+.race-countdown .days-lbl { font-size: 0.55rem; color: var(–muted); text-transform: uppercase; letter-spacing: 1px; font-family: ‘Barlow Condensed’, sans-serif; }
+.tabs { display: flex; border-top: 1px solid var(–border); margin: 0 -16px; }
+.tab { flex: 1; padding: 8px 4px; text-align: center; font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.72rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(–muted); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab.active { color: var(–green); border-bottom-color: var(–green); }
+
+main { padding: 14px 14px 80px; max-width: 560px; margin: 0 auto; }
+html { scroll-padding-top: 90px; }
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* STAT STRIP */
+.stat-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 16px; }
+.stat-box { background: var(–card); border: 1px solid var(–border); border-radius: 10px; padding: 10px 6px; text-align: center; }
+.stat-box .v { font-family: ‘Barlow Condensed’, sans-serif; font-size: 1.5rem; font-weight: 700; color: var(–green); line-height: 1; }
+.stat-box .l { font-size: 0.58rem; color: var(–muted); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; font-family: ‘Barlow Condensed’, sans-serif; }
+
+/* PHASE HEADER */
+.phase-header { display: flex; align-items: center; gap: 8px; margin: 18px 0 8px; }
+.phase-pip { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.phase-name { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.68rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; }
+.phase-line { flex: 1; height: 1px; background: var(–border); }
+
+/* WEEK ROW */
+.week-row { display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: var(–card); border: 1px solid var(–border); border-radius: 10px; margin-bottom: 5px; cursor: pointer; transition: border-color 0.2s; position: relative; overflow: hidden; }
+.week-row.wk-done { background: var(–done-bg); border-color: rgba(61,255,160,0.2); }
+.week-row.wk-current { border-color: var(–green); }
+.week-row.wk-current::before { content:’’; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(–green); border-radius:3px 0 0 3px; }
+.wk-num { font-family: ‘Barlow Condensed’, sans-serif; font-size: 1.2rem; font-weight: 700; color: var(–muted2); min-width: 26px; }
+.week-row.wk-current .wk-num { color: var(–green); }
+.week-row.wk-done .wk-num { color: var(–green); opacity: 0.5; }
+.wk-info { flex: 1; min-width: 0; }
+.wk-focus { font-size: 0.82rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wk-meta { font-size: 0.63rem; color: var(–muted); margin-top: 2px; font-family: ‘Barlow Condensed’, sans-serif; letter-spacing: 0.5px; }
+.wk-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.wk-km { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.78rem; font-weight: 600; color: var(–muted); }
+.wk-dots { display: flex; gap: 3px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(–border2); background: transparent; }
+.dot.d-interval { border-color: var(–orange); }
+.dot.d-tempo { border-color: var(–blue); }
+.dot.d-easy { border-color: rgba(61,255,160,0.4); }
+.dot.d-long { border-color: var(–yellow); }
+.dot.d-race { border-color: var(–red); }
+.dot.done { background: var(–green); border-color: var(–green); }
+.wk-chevron { color: var(–muted2); font-size: 1rem; }
+.cutback-badge { display: inline-block; font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.58rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: rgba(91,159,255,0.12); color: var(–blue); border: 1px solid rgba(91,159,255,0.2); margin-left: 6px; vertical-align: middle; }
+
+/* WEEK DETAIL */
+.back-btn { display: flex; align-items: center; gap: 5px; background: none; border: none; color: var(–muted); font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; padding: 0; margin-bottom: 12px; transition: color 0.2s; }
+.back-btn:hover { color: var(–green); }
+.week-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.nav-btn { background: var(–card); border: 1px solid var(–border); color: var(–text); font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; padding: 7px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+.nav-btn:hover { border-color: var(–green); color: var(–green); }
+.nav-btn:disabled { opacity: 0.25; pointer-events: none; }
+.nav-label { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 2px; color: var(–muted); text-transform: uppercase; }
+
+.week-summary { background: var(–card); border: 1px solid var(–border); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.ws-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.ws-phase { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.62rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; }
+.ws-title { font-family: ‘Barlow Condensed’, sans-serif; font-size: 1.7rem; font-weight: 900; letter-spacing: 1px; line-height: 1; }
+.ws-date { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.68rem; color: var(–muted); margin-top: 3px; }
+.ws-km-big { text-align: right; flex-shrink: 0; }
+.km-val { font-family: ‘Barlow Condensed’, sans-serif; font-size: 2rem; font-weight: 900; color: var(–yellow); line-height: 1; }
+.km-lbl { font-size: 0.58rem; color: var(–muted); font-family: ‘Barlow Condensed’, sans-serif; letter-spacing: 1px; text-transform: uppercase; }
+.coach-note { font-size: 0.81rem; color: #c0c8d8; line-height: 1.65; padding-top: 10px; border-top: 1px solid var(–border); font-style: italic; }
+.coach-note strong { font-style: normal; color: var(–green); font-weight: 500; }
+
+.injury-flag { display: flex; gap: 8px; align-items: flex-start; background: var(–warn-bg); border: 1px solid rgba(255,76,106,0.25); border-left: 3px solid var(–red); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+.flag-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.flag-text { font-size: 0.75rem; color: #ffb0b8; line-height: 1.55; }
+.flag-text strong { color: var(–red); font-style: normal; }
+
+/* SESSION CARDS */
+.session-card { background: var(–card); border: 1px solid var(–border); border-radius: 12px; padding: 14px; margin-bottom: 8px; }
+.session-card.s-done { background: var(–done-bg); border-color: rgba(61,255,160,0.2); opacity: 0.8; }
+.session-card.s-optional { border-style: dashed; }
+.s-top { display: flex; align-items: flex-start; gap: 10px; }
+.s-left { flex: 1; min-width: 0; }
+.s-badge-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; flex-wrap: wrap; }
+.s-badge { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; }
+.badge-interval { background: rgba(255,124,58,0.15); color: var(–orange); }
+.badge-tempo { background: rgba(91,159,255,0.15); color: var(–blue); }
+.badge-easy { background: rgba(61,255,160,0.1); color: var(–green); }
+.badge-long { background: rgba(255,228,74,0.12); color: var(–yellow); }
+.badge-race { background: rgba(255,76,106,0.15); color: var(–red); }
+.badge-opt { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.58rem; letter-spacing: 1px; text-transform: uppercase; color: var(–muted); border: 1px solid var(–border2); padding: 1px 6px; border-radius: 4px; }
+.s-day { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.63rem; color: var(–muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+.s-workout { font-size: 0.88rem; font-weight: 500; line-height: 1.35; }
+.session-card.s-done .s-workout { text-decoration: line-through; color: var(–muted); }
+.s-km-row { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.65rem; color: var(–muted); margin-top: 3px; }
+.tick-btn { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(–border2); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; transition: all 0.2s; flex-shrink: 0; color: var(–muted); }
+.tick-btn:hover { border-color: var(–green); color: var(–green); }
+.tick-btn.ticked { background: var(–green); border-color: var(–green); color: #080c10; font-weight: 700; }
+.s-tip { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(–border); font-size: 0.75rem; color: var(–muted); line-height: 1.6; font-style: italic; }
+.s-tip::before { content: ’💡 ’; font-style: normal; }
+
+/* WEEK KM SUMMARY */
+.km-summary { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.km-pill { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.68rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; background: var(–card2); border: 1px solid var(–border2); color: var(–muted); letter-spacing: 0.5px; }
+.km-pill.kp-done { color: var(–green); border-color: rgba(61,255,160,0.3); }
+
+/* GYM CARD */
+.gym-card { background: var(–card2); border: 1px solid var(–border2); border-radius: 12px; padding: 14px; margin-bottom: 8px; }
+.gym-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.gym-title { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(–blue); }
+.gym-sub { font-size: 0.65rem; color: var(–muted); margin-left: auto; font-family: ‘Barlow Condensed’, sans-serif; }
+.gym-section { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(–muted2); margin: 8px 0 5px; }
+.gym-ex { margin-bottom: 6px; }
+.gym-ex-name { font-size: 0.8rem; font-weight: 500; color: var(–text); font-family: ‘Literata’, Georgia, serif; }
+.gym-ex-detail { font-size: 0.68rem; color: var(–muted); margin-top: 1px; font-family: ‘Literata’, Georgia, serif; }
+
+/* RACE BANNER */
+.race-banner { background: linear-gradient(135deg, rgba(255,76,106,0.1), rgba(255,228,74,0.07)); border: 1px solid rgba(255,76,106,0.35); border-radius: 14px; padding: 18px; text-align: center; margin-bottom: 8px; }
+.race-emoji { font-size: 2rem; display: block; margin-bottom: 6px; }
+.race-title { font-family: ‘Barlow Condensed’, sans-serif; font-size: 2rem; font-weight: 900; letter-spacing: 3px; color: var(–red); line-height: 1; margin-bottom: 6px; }
+.race-sub { font-size: 0.78rem; color: var(–muted); margin-bottom: 12px; line-height: 1.6; }
+.race-tick { width: 44px; height: 44px; border-radius: 50%; border: 2px solid rgba(255,76,106,0.4); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin: 0 auto; transition: all 0.2s; color: var(–muted); }
+.race-tick:hover { border-color: var(–red); color: var(–red); }
+.race-tick.ticked { background: var(–red); border-color: var(–red); color: white; }
+
+/* PREHAB */
+.prehab-intro { background: var(–card); border: 1px solid var(–border); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+.prehab-intro h2 { font-family: ‘Barlow Condensed’, sans-serif; font-size: 1.4rem; font-weight: 900; letter-spacing: 1px; color: var(–blue); margin-bottom: 6px; }
+.prehab-intro p { font-size: 0.8rem; color: #c0c8d8; line-height: 1.65; }
+.prehab-section { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.65rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(–muted); margin: 16px 0 8px; }
+.ex-card { background: var(–card); border: 1px solid var(–border); border-radius: 12px; padding: 14px; margin-bottom: 8px; }
+.ex-card-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.ex-icon { font-size: 1.3rem; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(–card2); border-radius: 8px; flex-shrink: 0; }
+.ex-title { font-size: 0.88rem; font-weight: 500; line-height: 1.2; }
+.ex-sets { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.7rem; color: var(–blue); font-weight: 600; margin-top: 2px; }
+.ex-priority { margin-left: auto; flex-shrink: 0; font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.58rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; }
+.p-critical { background: rgba(255,76,106,0.15); color: var(–red); }
+.p-high { background: rgba(255,228,74,0.12); color: var(–yellow); }
+.p-daily { background: rgba(61,255,160,0.1); color: var(–green); }
+.ex-why { font-size: 0.75rem; color: var(–muted); line-height: 1.6; padding-top: 8px; border-top: 1px solid var(–border); font-style: italic; }
+.ex-when { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.63rem; color: var(–muted2); margin-top: 5px; letter-spacing: 0.3px; }
+.warning-box { background: var(–warn-bg); border: 1px solid rgba(255,76,106,0.3); border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+.warning-box h3 { font-family: ‘Barlow Condensed’, sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 1px; color: var(–red); margin-bottom: 8px; text-transform: uppercase; }
+.warn-item { display: flex; gap: 8px; margin-bottom: 6px; font-size: 0.77rem; color: #ffb0b8; line-height: 1.5; }
+.warn-item::before { content: ‘⚠’; flex-shrink: 0; }
+.gym-schedule { background: var(–card); border: 1px solid var(–border); border-radius: 12px; padding: 14px; margin-bottom: 8px; }
+.gym-schedule h3 { font-family: ‘Barlow Condensed’, sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 1px; color: var(–blue); margin-bottom: 10px; text-transform: uppercase; }
+.gs-day { margin-bottom: 10px; }
+.gs-label { font-family: ‘Barlow Condensed’, sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(–yellow); margin-bottom: 4px; }
+.gs-items { font-size: 0.78rem; color: #c0c8d8; line-height: 1.8; }
+</style>
+
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="brand">
+      <h1>Sub-20 5K</h1>
+      <p>18 Weeks · 4 Sessions · Injury Smart</p>
+    </div>
+    <div class="header-meta">
+      <div class="race-countdown">
+        <div class="days" id="daysLeft">—</div>
+        <div class="days-lbl">to race</div>
+      </div>
+      <div class="progress-wrap">
+        <svg viewBox="0 0 42 42">
+          <circle class="ring-bg" cx="21" cy="21" r="17"/>
+          <circle class="ring-bar" id="ringBar" cx="21" cy="21" r="17" stroke-dasharray="106.8" stroke-dashoffset="106.8"/>
+          <text class="ring-text" id="ringPct" x="21" y="21">0%</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview')">Overview</button>
+    <button class="tab" onclick="switchTab('week')">This Week</button>
+    <button class="tab" onclick="switchTab('prehab')">Prehab</button>
+  </div>
+</div>
+
+<main>
+  <div class="view active" id="tab-overview"></div>
+  <div class="view" id="tab-week"></div>
+  <div class="view" id="tab-prehab"></div>
+</main>
+
+<script>
+// ─── DATES ───────────────────────────────────────────────────
+const START = new Date('2026-03-09');
+const RACE  = new Date('2026-06-28');
+
+function weekStart(n) { const d = new Date(START); d.setDate(d.getDate()+(n-1)*7); return d; }
+function fmt(d) { return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}); }
+function weekRange(n) { const s=weekStart(n); const e=new Date(s); e.setDate(e.getDate()+6); return fmt(s)+' – '+fmt(e); }
+
+// ─── PLAN DATA ────────────────────────────────────────────────
+// Every week has exactly 4 sessions: Tue, Wed, Fri, Sun
+// Verified totals: Tue.km + Wed.km + Fri.km + Sun.km = totalKm (±0.5)
+const WEEKS = [
+ // ══ PHASE 1: BASE ══ Weeks 1-5 ══ Tempo only, no intervals yet ══
+ { n:1, phase:'base', focus:'Aerobic Foundation', totalKm:32, cutback:false,
+   injuryFlag:null,
+   note:'First week of the plan. <strong>Tempo-only</strong> — no intervals yet. This protects your post-tib from the reactive load of speed work before it\'s ready. Easy days must be genuinely easy: you should be able to hold a full conversation. Wednesday is optional — do it if you can, skip it freely if not.',
+   sessions:[
+     {day:'Tuesday',  type:'tempo', workout:'W/U 1.5km · 20 min @4:40/km · C/D 1.5km', km:7.5, optional:false, tip:'4:40/km is comfortably hard — about 6/10 effort. You should be able to say 3-4 words but not a sentence. Always include the warm-up and cool-down jog.'},
+     {day:'Wednesday',type:'easy',  workout:'8–10 km easy (club run or solo)', km:9, optional:true,  tip:'Genuinely easy. Club 10km if you can make it; solo run or skip entirely if not. Never push pace on this run — it\'s recovery mileage.'},
+     {day:'Friday',   type:'easy',  workout:'6 km easy', km:6, optional:false, tip:'Easy run to keep legs moving between sessions. Conversational pace. No effort at all.'},
+     {day:'Sunday',   type:'long',  workout:'10 km easy', km:10, optional:false, tip:'Relaxed long run. Same effort as Wednesday — time on feet is what matters, not pace.'}
+   ]},
+ { n:2, phase:'base', focus:'Building the Base', totalKm:34, cutback:false,
+   injuryFlag:null,
+   note:'Marginal progressions across every session. The tempo gets slightly longer, the long run grows by 1km. These small steps compound over 18 weeks into real fitness. <strong>Keep Wednesday genuinely easy</strong> — it\'s aerobic top-up mileage, not a workout.',
+   sessions:[
+     {day:'Tuesday',  type:'tempo', workout:'W/U 1.5km · 22 min @4:38/km · C/D 1.5km', km:8, optional:false, tip:'2 minutes longer and marginally faster than week 1. Pace it evenly — no surges at the end.'},
+     {day:'Wednesday',type:'easy',  workout:'8–10 km easy (optional)', km:9, optional:true,  tip:'Optional club run or solo easy. Skip if legs feel heavy.'},
+     {day:'Friday',   type:'easy',  workout:'6 km easy', km:6, optional:false, tip:'Easy run. Use this to check in with how your shins and ankles feel — useful feedback early in the plan.'},
+     {day:'Sunday',   type:'long',  workout:'11 km easy', km:11, optional:false, tip:'1km further than last week. Consistent long-run progression is your biggest aerobic investment.'}
+   ]},
+ { n:3, phase:'base', focus:'First Interval Session', totalKm:33, cutback:false,
+   injuryFlag:'First interval week. Your post-tib is most vulnerable when introducing speed work after a period without it. <strong>If you feel any tenderness behind the inner ankle before or during Tuesday\'s session, replace it with an easy run.</strong> Do not push through post-tib discomfort.',
+   note:'<strong>Intervals arrive — treat this session with respect.</strong> 400m reps are short enough to limit tendon overload while introducing the neuromuscular stimulus you need. Run them at 4:05/km, not faster. Friday drops to easy-only to balance the new load. Check in carefully with how your legs feel on Wednesday.',
+   sessions:[
+     {day:'Tuesday',  type:'interval', workout:'W/U 1.5km · 5×400m @4:05/km (90s jog) · C/D 1km', km:7, optional:false, tip:'Short, controlled reps. 90s jog between each. 7/10 effort — not maximal. Note how your shins and ankles feel during and the morning after.'},
+     {day:'Wednesday',type:'easy',     workout:'8 km easy (optional — check legs first)', km:8, optional:true,  tip:'Optional. Do a careful post-tib check before going. Any inner ankle tenderness from Tuesday = skip this run entirely.'},
+     {day:'Friday',   type:'easy',     workout:'6 km easy', km:6, optional:false, tip:'Easy run. Your legs are adapting to interval stimulus — keep this genuinely easy.'},
+     {day:'Sunday',   type:'long',     workout:'12 km easy', km:12, optional:false, tip:'Longest run so far. Keep effort easy. Your body is absorbing a new training stimulus this week.'}
+   ]},
+ { n:4, phase:'base', focus:'Cutback Week', totalKm:27, cutback:true,
+   injuryFlag:null,
+   note:'<strong>Deliberate cutback week.</strong> Tendons and bones adapt slower than your cardiovascular fitness — this week lets everything catch up. Do not add extra running thinking you\'re being lazy. This is the week that keeps you injury-free for the remaining 14 weeks. Use the extra time to nail your prehab exercises.',
+   sessions:[
+     {day:'Tuesday',  type:'tempo', workout:'W/U 1km · 18 min @4:40/km · C/D 1km', km:6.5, optional:false, tip:'Shorter and easier tempo. Cutback week means cutback week — don\'t try to make it harder than prescribed.'},
+     {day:'Wednesday',type:'easy',  workout:'6 km easy (optional)', km:6, optional:true,  tip:'Optional and short. Only go if you feel genuinely fresh.'},
+     {day:'Friday',   type:'easy',  workout:'5 km easy', km:5, optional:false, tip:'Short easy run. Legs should feel noticeably fresher by Friday of a cutback week.'},
+     {day:'Sunday',   type:'long',  workout:'9 km easy', km:9, optional:false, tip:'Shortest long run in the plan. Deliberate and intentional. Enjoy the reduced load.'}
+   ]},
+ { n:5, phase:'base', focus:'Base Consolidation', totalKm:38, cutback:false,
+   injuryFlag:null,
+   note:'Back to building after the cutback — you should feel fresh and ready. This is the biggest base week: 25-minute tempo at 4:35/km and a 13km long run. Your aerobic engine is now solid enough to begin the build phase next week.',
+   sessions:[
+     {day:'Tuesday',  type:'tempo', workout:'W/U 1.5km · 25 min @4:35/km · C/D 1.5km', km:9, optional:false, tip:'Longest and sharpest tempo of the base phase. Approach this with confidence — you\'ve earned it. Start slightly conservative and build into the effort.'},
+     {day:'Wednesday',type:'easy',  workout:'8–10 km easy (optional)', km:9, optional:true,  tip:'Optional club run. A great week to go — you\'re fresh from the cutback and fitness is building.'},
+     {day:'Friday',   type:'easy',  workout:'7 km easy', km:7, optional:false, tip:'Easy run with slightly more volume than earlier weeks. Keep it easy.'},
+     {day:'Sunday',   type:'long',  workout:'13 km easy', km:13, optional:false, tip:'Progressive long run. Strong aerobic base is the foundation sub-20 is built on.'}
+   ]},
+
+ // ══ PHASE 2: BUILD ══ Weeks 6-11 ══ Alternating interval/tempo, mileage peaks ══
+ { n:6, phase:'build', focus:'1km Repeats Begin', totalKm:37, cutback:false,
+   injuryFlag:'Build phase begins. Mileage and intensity both increase from here. <strong>Monitor your post-tib closely every week.</strong> Inner ankle tenderness = swap interval session for easy run. No heroics.',
+   note:'<strong>Welcome to the build phase.</strong> 1km repeats are the single most important interval session for sub-20. They\'re long enough to demand pace discipline, short enough to run quality. The alternating structure means this interval week is followed by a tempo week — your legs get a different quality stimulus each week.',
+   sessions:[
+     {day:'Tuesday',  type:'interval', workout:'W/U 1.5km · 4×1km @4:08/km (2 min jog) · C/D 1km', km:8, optional:false, tip:'1km reps — the workhorse session. Pace the first 400m conservatively. 2-min jog recovery between reps. Finish feeling like you could do one more.'},
+     {day:'Wednesday',type:'easy',     workout:'8–10 km easy (optional)', km:9, optional:true,  tip:'Optional. Do not do this if your legs feel heavy from Tuesday\'s 1km reps.'},
+     {day:'Friday',   type:'easy',     workout:'7 km easy', km:7, optional:false, tip:'Easy run. Building weekly mileage alongside quality sessions.'},
+     {day:'Sunday',   type:'long',     workout:'13 km easy', km:13, optional:false, tip:'Consistent long run. Aerobic base building alongside your speed work.'}
+   ]},
+ { n:7, phase:'build', focus:'Threshold Development', totalKm:39, cutback:false,
+   injuryFlag:null,
+   note:'Tempo week. The alternating structure is deliberate — interval weeks stress your neuromuscular system, tempo weeks target your lactate threshold. Both are needed for sub-20. 3×8 min broken tempo is easier to pace than continuous running but accumulates the same quality stimulus.',
+   sessions:[
+     {day:'Tuesday',  type:'tempo', workout:'W/U 1.5km · 3×8 min @4:35/km (90s jog) · C/D 1.5km', km:9, optional:false, tip:'Break the tempo into 3 blocks — each one should feel like the same effort. 90-second jog recovery between sets. The rest makes you faster overall.'},
+     {day:'Wednesday',type:'easy',  workout:'8–10 km easy (optional)', km:9, optional:true,  tip:'Optional. Good week to go if you\'re feeling fresh.'},
+     {day:'Friday',   type:'easy',  workout:'7 km easy', km:7, optional:false, tip:'Easy run. Keep the effort low — Tuesday\'s tempo is the quality work this week.'},
+     {day:'Sunday',   type:'long',  workout:'14 km easy', km:14, optional:false, tip:'First 14km long run. Time on feet at easy effort is a powerful fitness builder.'}
+   ]},
+ { n:8, phase:'build', focus:'Longer Intervals', totalKm:38, cutback:false,
+   injuryFlag:'Mileage is above your previous peak. <strong>Wednesday is especially optional this week.</strong> Skip it without guilt if there is any lower-leg fatigue or post-tib tenderness.',
+   note:'1200m reps are a step up from 1km — they demand better pacing discipline and more sustained effort. <strong>The Wednesday run is your most skippable session of the week</strong> given the total load. Post-tib and shin stress accumulate fastest when mileage and intensity rise simultaneously.',
+   sessions:[
+     {day:'Tuesday',  type:'interval', workout:'W/U 1.5km · 4×1200m @4:05/km (2 min jog) · C/D 1km', km:9, optional:false, tip:'Pace the first 400m at 4:08 then settle to 4:05 for the remaining 800m. Do not sprint the last 200m of any rep — consistency across all 4 reps is the goal.'},
+     {day:'Wednesday',type:'easy',     workout:'6–8 km easy (optional — skip if fatigued)', km:8, optional:true,  tip:'SKIP THIS if your legs feel heavy or there is any post-tib tenderness. The long run on Sunday is more important than this easy run.'},
+     {day:'Friday',   type:'easy',     workout:'7 km easy', km:7, optional:false, tip:'Easy run. Check in with your post-tib and shins before going.'},
+     {day:'Sunday',   type:'long',     workout:'14 km easy', km:14, optional:false, tip:'Hold 14km at easy effort. Your aerobic base is well ahead of where it needs to be.'}
+   ]},
+ { n:9, phase:'build', focus:'Cutback Week', totalKm:28, cutback:true,
+   injuryFlag:null,
+   note:'<strong>Second cutback week — and the most important one.</strong> You\'ve pushed above your previous peak mileage and introduced 1200m reps. Your tendons are remodelling and need this. Treat every session this week as lower intensity than it looks. Use the recovered energy to do a full week of prehab without shortcuts.',
+   sessions:[
+     {day:'Tuesday',  type:'tempo', workout:'W/U 1km · 20 min @4:38/km · C/D 1km', km:7, optional:false, tip:'Easy tempo in a cutback week. Controlled and comfortable — do not chase pace. Think of it as a quality easy run.'},
+     {day:'Wednesday',type:'easy',  workout:'6 km easy (optional)', km:6, optional:true,  tip:'Short and easy if you go. No pressure to run.'},
+     {day:'Friday',   type:'easy',  workout:'5 km easy', km:5, optional:false, tip:'Short easy run. Your legs should feel noticeably fresher by now.'},
+     {day:'Sunday',   type:'long',  workout:'10 km easy', km:10, optional:false, tip:'Short long run. Your body is getting stronger — the cutback is doing its job.'}
+   ]},
+ { n:10, phase:'build', focus:'Race Pace Arrives', totalKm:42, cutback:false,
+   injuryFlag:'First week at 4:00/km — actual race pace. <strong>Pay close attention to how your post-tib responds the morning after Tuesday\'s session.</strong> Any tenderness = easy run only on Friday.',
+   note:'<strong>Race pace arrives.</strong> 5×1km at 4:00/km is the defining session of sub-20 training. Your body needs to know exactly what this pace feels like — in your lungs, your legs, and your mind. If the reps feel impossible, back off to 4:03/km. Fitness will come — chasing pace at the cost of injury will not.',
+   sessions:[
+     {day:'Tuesday',  type:'interval', workout:'W/U 1.5km · 5×1km @4:00/km (2 min jog) · C/D 1km', km:9.5, optional:false, tip:'This is your 5K race pace. Run rep 1 at 4:02 as a check, then settle to 4:00. Two-minute jog between reps. Note exactly how the effort feels — this is your race benchmark.'},
+     {day:'Wednesday',type:'easy',     workout:'8–10 km easy (optional)', km:9, optional:true,  tip:'Optional. Do a thorough post-tib check before going. Inner ankle tenderness from Tuesday = skip.'},
+     {day:'Friday',   type:'easy',     workout:'8 km easy', km:8, optional:false, tip:'Easy run. Higher volume now as you approach peak mileage. Keep effort genuinely easy.'},
+     {day:'Sunday',   type:'long',     workout:'15 km easy', km:15, optional:false, tip:'Longest long run in the plan. You should feel like you could comfortably go further — if not, you\'re running too fast.'}
+   ]},
+ { n:11, phase:'build', focus:'Peak Training Week', totalKm:42, cutback:false,
+   injuryFlag:'Peak load week. Highest sustained quality of the entire plan. <strong>Sleep, nutrition, and prehab are non-negotiable this week.</strong> Any post-tib or Achilles whisper = mandatory day off.',
+   note:'<strong>This is the top of the mountain.</strong> A 28-minute continuous tempo at 4:33/km is your biggest single session. After this week, volume never gets this high again — the sharpening phase reduces load as your fitness peaks. This week will feel tough. That\'s the point.',
+   sessions:[
+     {day:'Tuesday',  type:'tempo', workout:'W/U 1.5km · 28 min @4:33/km · C/D 1.5km', km:10, optional:false, tip:'Your hardest tempo of the plan. Start at 6/10 effort — it will build naturally. If you\'re struggling at 20 minutes, slow slightly rather than stopping. Completion matters more than pace today.'},
+     {day:'Wednesday',type:'easy',  workout:'8–10 km easy (optional)', km:9, optional:true,  tip:'Optional. Useful this week — easy miles support recovery from Tuesday\'s big session. Only go if legs genuinely feel good.'},
+     {day:'Friday',   type:'easy',  workout:'8 km easy', km:8, optional:false, tip:'Easy run at peak mileage week. Keep it easy — Tuesday does the fitness work.'},
+     {day:'Sunday',   type:'long',  workout:'15 km easy', km:15, optional:false, tip:'Second week at 15km — reinforcing your aerobic peak. After this, long runs begin to drop.'}
+   ]},
+
+ // ══ PHASE 3: SHARPEN ══ Weeks 12-16 ══ Volume drops, pace sharpens ══
+ { n:12, phase:'sharpen', focus:'Sharpening Phase Begins', totalKm:35, cutback:false,
+   injuryFlag:null,
+   note:'<strong>Volume drops, pace sharpens.</strong> You\'ve built the engine — now you\'re tuning it. 6×400m at 3:55/km is faster than race pace, training your legs to turn over quickly. You should start feeling noticeably sharper this week. The long run drops to 13km. Trust the process.',
+   sessions:[
+     {day:'Tuesday',  type:'interval', workout:'W/U 1.5km · 6×400m @3:55/km (90s jog) · C/D 1km', km:7.5, optional:false, tip:'Faster than race pace! 400m at 3:55/km ≈ 94 seconds. Quick and snappy — these should feel fast but controlled, not maximal. 90-second jog recovery.'},
+     {day:'Wednesday',type:'easy',     workout:'8 km easy (optional)', km:8, optional:true,  tip:'Optional. Volume is coming down in this phase — Wednesday is lower priority.'},
+     {day:'Friday',   type:'easy',     workout:'7 km easy', km:7, optional:false, tip:'Easy run. Your legs should be feeling sharper and fresher as volume drops.'},
+     {day:'Sunday',   type:'long',     workout:'13 km easy', km:13, optional:false, tip:'Long run drops. You\'re moving from building to banking your fitness.'}
+   ]},
+ { n:13, phase:'sharpen', focus:'Tempo Confidence', totalKm:36, cutback:false,
+   injuryFlag:null,
+   note:'Tempo week with a faster pace than you\'ve seen before — 4:28/km. This is evidence of your fitness improving. The same 25-minute duration at a pace you couldn\'t have held 8 weeks ago. Notice the difference. Your threshold has genuinely moved.',
+   sessions:[
+     {day:'Tuesday',  type:'tempo', workout:'W/U 1.5km · 25 min @4:28/km · C/D 1.5km', km:8.5, optional:false, tip:'Faster tempo — same duration, sharper pace. This should feel hard but controlled. If it feels easy, your fitness is excellent. If it feels impossible, back off 5 seconds and build from there.'},
+     {day:'Wednesday',type:'easy',  workout:'8 km easy (optional)', km:8, optional:true,  tip:'Optional easy run. Short and relaxed if you go.'},
+     {day:'Friday',   type:'easy',  workout:'7 km easy', km:7, optional:false, tip:'Easy run. Legs should be feeling increasingly fresh as sharpening phase volume drops.'},
+     {day:'Sunday',   type:'long',  workout:'13 km easy', km:13, optional:false, tip:'Consistent 13km. Maintaining aerobic base while sharpening speed.'}
+   ]},
+ { n:14, phase:'sharpen', focus:'Race-Specific Repeats', totalKm:34, cutback:false,
+   injuryFlag:null,
+   note:'3×1600m at 4:00/km — race pace for nearly a mile. This is the most race-specific interval in the plan. Your body now knows this pace well. Control the first 800m of each rep and the back half will take care of itself. You\'re 4 weeks from race day.',
+   sessions:[
+     {day:'Tuesday',  type:'interval', workout:'W/U 1.5km · 3×1600m @4:00/km (2.5 min jog) · C/D 1km', km:9, optional:false, tip:'1600m at race pace. Hold back in the first 800m — the temptation to go out fast is real. 2.5-minute jog recovery. Three reps is enough — quality over quantity.'},
+     {day:'Wednesday',type:'easy',     workout:'6–8 km easy (optional)', km:7, optional:true,  tip:'Optional and short. Easy only.'},
+     {day:'Friday',   type:'easy',     workout:'6 km easy', km:6, optional:false, tip:'Easy run. Volume continuing to drop — trust the process.'},
+     {day:'Sunday',   type:'long',     workout:'12 km easy', km:12, optional:false, tip:'Reduced long run as sharpening takes full effect. The fitness is built.'}
+   ]},
+ { n:15, phase:'sharpen', focus:'Speed Reserve', totalKm:32, cutback:false,
+   injuryFlag:null,
+   note:'Sub-race-pace 800m reps build your speed reserve. The ability to run faster than race pace means race pace feels controlled and sustainable. <strong>You should feel genuinely fast this week.</strong> Three weeks to race day. Excitement and nerves are both normal — use them.',
+   sessions:[
+     {day:'Tuesday',  type:'interval', workout:'W/U 1.5km · 6×800m @3:55/km (90s jog) · C/D 1km', km:8, optional:false, tip:'Sub-race-pace 800s. Sharp turnover, relaxed shoulders. These should feel quick and clean — fast but not desperate. 90-second jog recovery.'},
+     {day:'Wednesday',type:'easy',     workout:'6–7 km easy (optional)', km:7, optional:true,  tip:'Optional easy run. Short and relaxed.'},
+     {day:'Friday',   type:'easy',     workout:'6 km easy', km:6, optional:false, tip:'Easy run. Legs should be feeling springy as taper approaches.'},
+     {day:'Sunday',   type:'long',     workout:'11 km easy', km:11, optional:false, tip:'Volume continuing to reduce. Fitness is built and being banked.'}
+   ]},
+ { n:16, phase:'sharpen', focus:'Final Quality Week', totalKm:30, cutback:false,
+   injuryFlag:null,
+   note:'<strong>The hay is in the barn.</strong> Final quality week before taper. 4×1km at 3:58/km — just under race pace. These should feel fast and controlled. After Sunday\'s long run, you\'ve done everything you need to do to run sub-20. The next two weeks are about arriving fresh.',
+   sessions:[
+     {day:'Tuesday',  type:'interval', workout:'W/U 1.5km · 4×1km @3:58/km (2 min jog) · C/D 1km', km:7.5, optional:false, tip:'Sub-race-pace 1km reps. Finish strong and feeling fast — not exhausted. These are confidence-builders, not killers. The training is done.'},
+     {day:'Wednesday',type:'easy',     workout:'6 km easy (optional)', km:6, optional:true,  tip:'Optional. Short and easy. Begin winding down mentally as much as physically.'},
+     {day:'Friday',   type:'easy',     workout:'6 km easy', km:6, optional:false, tip:'Easy run. Last regular Friday run of the plan. Relax and enjoy it.'},
+     {day:'Sunday',   type:'long',     workout:'11 km easy', km:11, optional:false, tip:'Last proper long run. Comfortable and enjoyable. You\'re nearly there.'}
+   ]},
+
+ // ══ PHASE 4: TAPER ══ Weeks 17-18 ══
+ { n:17, phase:'taper', focus:'Taper Week', totalKm:22, cutback:false,
+   injuryFlag:null,
+   note:'<strong>Taper time.</strong> Volume drops significantly. You may feel flat, sluggish, or doubt your fitness — this is completely normal and is called taper madness. <strong>Do not add extra running.</strong> Your legs are storing glycogen and your tendons are consolidating the training. Sleep well. Eat well. Do your prehab. Stay off your feet where you can.',
+   sessions:[
+     {day:'Tuesday',  type:'interval', workout:'W/U 1km · 4×400m @3:55/km (90s jog) · C/D 1km', km:5, optional:false, tip:'Short, sharp, snappy. These wake your legs up without tiring them. Should feel fast and easy — a reminder that you\'re fit and sharp.'},
+     {day:'Wednesday',type:'easy',     workout:'5–6 km easy (optional)', km:5, optional:true,  tip:'Very short and easy if you go. Just keeping the legs moving.'},
+     {day:'Friday',   type:'easy',     workout:'4 km easy', km:4, optional:false, tip:'Short easy run. Legs should feel fresh and springy. One week to go.'},
+     {day:'Sunday',   type:'long',     workout:'8 km easy', km:8, optional:false, tip:'Short final long run. Relaxed, comfortable, confident. You are ready.'}
+   ]},
+ { n:18, phase:'taper', focus:'🏁 Race Week', totalKm:19, cutback:false,
+   injuryFlag:null,
+   note:'<strong>This is it.</strong> 17 weeks of work leads to Sunday. Tuesday\'s session is a final confidence check — it should feel fast and easy. Wednesday is a gentle shake-out. Friday is optional: a 20-min easy jog or full rest — do whatever makes you feel best. <strong>Race strategy: start at exactly 4:00/km. Not 3:55. Not 3:58. 4:00. The excitement will push you out too fast if you let it. Hold form through 3km. Push from 3km. Give everything in the final kilometre. You\'ve done the work. Now go get it.</strong>',
+   sessions:[
+     {day:'Tuesday',  type:'interval', workout:'W/U 1km · 3×1km @3:58/km (2 min jog) · C/D 1km', km:5, optional:false, tip:'Final sharpener. Race-pace reps — they should feel comfortable and fast. If they feel hard, it\'s nerves not fitness. You are ready.'},
+     {day:'Wednesday',type:'easy',     workout:'4–5 km very easy shake-out', km:4.5, optional:false, tip:'Gentle shake-out. Conversational pace or slower. Loosen the legs, calm the mind, visualise the race.'},
+     {day:'Friday',   type:'easy',     workout:'20 min easy jog or full rest', km:4, optional:true, tip:'Do what makes you feel best. Some runners perform better with a Friday jog; others prefer full rest. Trust your instincts.'},
+     {day:'Sunday',   type:'race',     workout:'5K RACE — TARGET: SUB 20:00 🏁', km:5, optional:false, tip:'Start at 4:00/km. Hold it. Push from 3km. Everything in the last km. This is your moment.'}
+   ]}
+];
+
+const PHASES = {
+  base:    { label:'Base Building',  color:'#3dffa0' },
+  build:   { label:'Build Phase',    color:'#ff7c3a' },
+  sharpen: { label:'Sharpening',     color:'#5b9fff' },
+  taper:   { label:'Taper & Race',   color:'#ffe44a' }
+};
+
+const PREHAB_EXERCISES = [
+  { icon:'🦵', title:'Single-Leg Calf Raise — Straight Leg', sets:'3×15 reps per leg · 3-3-3 tempo', priority:'critical', lab:'Critical',
+    why:'Directly loads and remodels the Achilles tendon. The slow tempo (3 sec up, 3 hold, 3 down) is non-negotiable — tendons respond to slow heavy load, not fast reps. This is your primary Achilles protection exercise.',
+    when:'Tue & Thu gym sessions. Progress to single-leg off a step once 3×15 feels easy.' },
+  { icon:'🦵', title:'Single-Leg Calf Raise — Bent Knee (Soleus)', sets:'3×15 reps per leg · slow tempo', priority:'critical', lab:'Critical',
+    why:'The soleus is only properly loaded with a bent knee. It\'s the primary decelerator of the foot and a major Achilles protector. Most runners only do straight-leg raises and completely miss this muscle.',
+    when:'Tue & Thu gym sessions. Do immediately after straight-leg version.' },
+  { icon:'🦶', title:'Tibialis Posterior Band Work', sets:'3×15 reps per leg · controlled', priority:'critical', lab:'Critical',
+    why:'The ONLY exercise that directly targets your post-tib muscle. Strengthening it reduces load on the tendon that nearly ended your running. Given your PTTD history, this is non-negotiable every gym session — and ideal to do on the sofa every evening too.',
+    when:'All gym sessions (Tue/Thu/Fri) + daily on sofa if possible. Sit, band around foot, rotate foot inward against resistance.' },
+  { icon:'🦶', title:'Foot Doming / Short Foot', sets:'10×5 second holds · each foot · daily', priority:'daily', lab:'Daily',
+    why:'Activates intrinsic foot muscles that support your medial arch, directly reducing load on the post-tib tendon. After severe PTTD your arch mechanics are compromised — this rebuilds them from the inside out. Takes 2 minutes.',
+    when:'Every day. Morning is ideal. Draw ball of foot toward heel without curling toes. Can be done sitting anywhere.' },
+  { icon:'🏋️', title:'Single-Leg Romanian Deadlift', sets:'3×10 per leg · light to moderate', priority:'high', lab:'High Priority',
+    why:'Trains the entire posterior chain in single-leg stance — closely mimicking running mechanics. Strengthens glutes and hamstrings which absorb load that would otherwise go through your post-tib. Also rebuilds proprioception reduced after tendon injuries.',
+    when:'Tue & Thu gym sessions. Fits naturally into your existing full-body format.' },
+  { icon:'💪', title:'Tibialis Anterior Band Work', sets:'3×15 reps per leg', priority:'high', lab:'High Priority',
+    why:'Balances the calf complex, directly reduces shin splint risk, and helps control foot landing. Sit in a chair, band over foot, lift foot upward against resistance (dorsiflexion). Directly addresses the anterior shin weakness behind your shin splints.',
+    when:'Friday gym session — perfect fit for your "everything else" day.' },
+  { icon:'🧘', title:'Soleus Stretch — Bent Knee', sets:'3×45 seconds · each side', priority:'daily', lab:'Daily',
+    why:'The soleus is chronically tight in runners and directly increases Achilles tendon load. Unlike the standard straight-leg calf stretch, this targets the soleus specifically. Tight soleus = elevated Achilles strain on every footstrike.',
+    when:'Daily, especially before bed. Back foot close to wall, bend back knee toward wall keeping heel flat.' },
+  { icon:'🧘', title:'Gastrocnemius Stretch — Straight Leg', sets:'3×45 seconds · each side', priority:'daily', lab:'Daily',
+    why:'Maintains length in the gastrocnemius, reducing Achilles load across the full range of motion. Works in tandem with the soleus stretch — do both, every day.',
+    when:'Daily. Classic wall stretch — straight back leg, heel flat, lean forward into wall.' }
+];
+
+// ─── STATE ───────────────────────────────────────────────────
+let completed = {};
+try {
+  const stored = localStorage.getItem('sub20v4');
+  if (stored) completed = JSON.parse(stored);
+} catch(e) { completed = {}; }
+function save() { try { localStorage.setItem('sub20v4', JSON.stringify(completed)); } catch(e) {} }
+function sKey(wn, si) { return 'w' + wn + 's' + si; }
+function isDone(wn, si) {
+  const val = completed[sKey(wn, si)];
+  return val === true;
+}
+function toggle(wn, si) {
+  const k = sKey(wn, si);
+  if (isDone(wn, si)) {
+    delete completed[k];
+  } else {
+    completed[k] = true;
+  }
+  save(); updateRing(); render();
+}
+function totalSessions() { return WEEKS.reduce((a,w) => a + w.sessions.length, 0); }
+function doneSessions()  { return Object.values(completed).filter(Boolean).length; }
+function currentWeek() {
+  for (let i=0; i<WEEKS.length; i++) {
+    if (!WEEKS[i].sessions.every((_,si) => isDone(i+1,si))) return i+1;
+  }
+  return 18;
+}
+
+// ─── RING & COUNTDOWN ────────────────────────────────────────
+function updateRing() {
+  const pct = Math.round(doneSessions()/totalSessions()*100);
+  const circ = 106.8;
+  document.getElementById('ringBar').style.strokeDashoffset = circ - circ*pct/100;
+  document.getElementById('ringPct').textContent = pct+'%';
+}
+function updateCountdown() {
+  const diff = Math.ceil((RACE - new Date()) / 86400000);
+  document.getElementById('daysLeft').textContent = diff > 0 ? diff : '🏁';
+}
+
+// ─── TAB SWITCHING ───────────────────────────────────────────
+let activeTab = 'overview';
+let selWeek = null;
+
+function switchTab(tab, wn) {
+  activeTab = tab;
+  if (wn) selWeek = wn;
+  if (tab === 'week' && !selWeek) selWeek = currentWeek();
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['overview','week','prehab'][i]===tab));
+  ['overview','week','prehab'].forEach(t => document.getElementById('tab-'+t).classList.toggle('active', t===tab));
+  render();
+}
+
+function render() {
+  if (activeTab==='overview') renderOverview();
+  else if (activeTab==='week') renderWeek(selWeek);
+  else renderPrehab();
+}
+
+// ─── OVERVIEW ────────────────────────────────────────────────
+function renderOverview() {
+  const cw = currentWeek();
+  let html = `<div class="stat-strip">
+    <div class="stat-box"><div class="v">${doneSessions()}</div><div class="l">Done</div></div>
+    <div class="stat-box"><div class="v">${cw}</div><div class="l">Week</div></div>
+    <div class="stat-box"><div class="v">${Math.max(0,19-cw)}</div><div class="l">Left</div></div>
+    <div class="stat-box"><div class="v">18</div><div class="l">Total</div></div>
+  </div>`;
+
+  let lastPhase = '';
+  WEEKS.forEach(w => {
+    if (w.phase !== lastPhase) {
+      const p = PHASES[w.phase];
+      html += `<div class="phase-header">
+        <div class="phase-pip" style="background:${p.color}"></div>
+        <span class="phase-name" style="color:${p.color}">${p.label}</span>
+        <div class="phase-line"></div>
+      </div>`;
+      lastPhase = w.phase;
+    }
+    const allDone = w.sessions.every((_,si) => isDone(w.n,si));
+    const isCur   = w.n === currentWeek() && !allDone;
+    const dots = w.sessions.map((s,si) => {
+      const d = isDone(w.n,si) ? ' done' : '';
+      return `<div class="dot d-${s.type}${d}"></div>`;
+    }).join('');
+    html += `<div class="week-row ${allDone?'wk-done':''} ${isCur?'wk-current':''}" onclick="switchTab('week',${w.n})">
+      <div class="wk-num">${w.n<10?'0'+w.n:w.n}</div>
+      <div class="wk-info">
+        <div class="wk-focus">${w.focus}${w.cutback?'<span class="cutback-badge">Recovery</span>':''}</div>
+        <div class="wk-meta">${weekRange(w.n)}</div>
+      </div>
+      <div class="wk-right">
+        <div class="wk-km">${w.totalKm} km</div>
+        <div class="wk-dots">${dots}</div>
+      </div>
+      <div class="wk-chevron">›</div>
+    </div>`;
+  });
+  document.getElementById('tab-overview').innerHTML = html;
+}
+
+// ─── WEEK DETAIL ─────────────────────────────────────────────
+function renderWeek(wn) {
+  const w = WEEKS[wn-1];
+  const pc = PHASES[w.phase].color;
+  const pl = PHASES[w.phase].label;
+
+  // km pill breakdown
+  const kmDone = w.sessions.reduce((a,s,si) => a + (isDone(wn,si) ? s.km : 0), 0);
+  const kmPills = w.sessions.map((s,si) => {
+    const d = isDone(wn,si);
+    return `<div class="km-pill${d?' kp-done':''}">${s.day.slice(0,3)}: ${s.km}km</div>`;
+  }).join('');
+
+  let html = `
+    <button class="back-btn" onclick="switchTab('overview')">‹ All Weeks</button>
+    <div class="week-nav">
+      <button class="nav-btn" onclick="switchTab('week',${wn-1})" ${wn===1?'disabled':''}>‹ Prev</button>
+      <span class="nav-label">Week ${wn} / 18</span>
+      <button class="nav-btn" onclick="switchTab('week',${wn+1})" ${wn===18?'disabled':''}>Next ›</button>
+    </div>
+
+    <div class="week-summary">
+      <div class="ws-top">
+        <div>
+          <div class="ws-phase" style="color:${pc}">${pl}${w.cutback?' · Recovery':''}</div>
+          <div class="ws-title">${w.focus}</div>
+          <div class="ws-date">${weekRange(wn)}</div>
+        </div>
+        <div class="ws-km-big">
+          <div class="km-val">${w.totalKm}</div>
+          <div class="km-lbl">km target</div>
+        </div>
+      </div>
+      <div class="coach-note">${w.note}</div>
+    </div>
+
+    <div class="km-summary">${kmPills}</div>`;
+
+  if (w.injuryFlag) {
+    html += `<div class="injury-flag"><div class="flag-icon">⚠️</div><div class="flag-text">${w.injuryFlag}</div></div>`;
+  }
+
+  w.sessions.forEach((s,si) => {
+    const done = isDone(wn,si);
+    if (s.type === 'race') {
+      html += `<div class="race-banner">
+        <span class="race-emoji">🏁</span>
+        <div class="race-title">RACE DAY</div>
+        <div class="race-sub">${s.workout}<br><br>${s.tip}</div>
+        <button class="race-tick ${done?'ticked':''}" onclick="toggle(${wn},${si})">${done?'✓':'○'}</button>
+      </div>`;
+      return;
+    }
+    const typeLabel = s.type==='long' ? 'long run' : s.type;
+    html += `<div class="session-card ${done?'s-done':''} ${s.optional?'s-optional':''}">
+      <div class="s-top">
+        <div class="s-left">
+          <div class="s-badge-row">
+            <span class="s-badge badge-${s.type==='long'?'long':s.type}">${typeLabel}</span>
+            ${s.optional?'<span class="badge-opt">Optional</span>':''}
+          </div>
+          <div class="s-day">${s.day}</div>
+          <div class="s-workout">${s.workout}</div>
+          <div class="s-km-row">~${s.km} km this session</div>
+        </div>
+        <button class="tick-btn ${done?'ticked':''}" onclick="toggle(${wn},${si})">${done?'✓':'○'}</button>
+      </div>
+      <div class="s-tip">${s.tip}</div>
+    </div>`;
+  });
+
+  // Gym summary card
+  html += `<div class="gym-card">
+    <div class="gym-header"><span>💪</span><span class="gym-title">Gym & Prehab This Week</span>
+    <span class="gym-sub">${w.phase==='taper'?'Reduce weights 20%':'Full programme'}</span></div>
+    <div class="gym-section">Tuesday &amp; Thursday — Full Body + Injury Prehab</div>
+    <div class="gym-ex"><div class="gym-ex-name">Single-leg calf raises (straight + bent knee)</div><div class="gym-ex-detail">3×15 each leg, slow tempo — non-negotiable</div></div>
+    <div class="gym-ex"><div class="gym-ex-name">Tibialis posterior band work</div><div class="gym-ex-detail">3×15 each leg — your single most important exercise</div></div>
+    <div class="gym-ex"><div class="gym-ex-name">Single-leg Romanian deadlift</div><div class="gym-ex-detail">3×10 each leg — posterior chain strength</div></div>
+    <div class="gym-section">Friday — Prehab Focus Session</div>
+    <div class="gym-ex"><div class="gym-ex-name">Tibialis anterior band work</div><div class="gym-ex-detail">3×15 each leg — shin splint prevention</div></div>
+    <div class="gym-ex"><div class="gym-ex-name">Foot doming / short foot exercise</div><div class="gym-ex-detail">10×5s holds each foot — arch rebuilding</div></div>
+    <div class="gym-section">Daily — 5 Minutes Every Day</div>
+    <div class="gym-ex"><div class="gym-ex-name">Soleus stretch (bent knee) + gastrocnemius stretch</div><div class="gym-ex-detail">3×45s each side, each stretch — every single day without exception</div></div>
+    <div class="gym-ex"><div class="gym-ex-name">Tibialis posterior band work on sofa</div><div class="gym-ex-detail">3×15 each leg — evening routine while watching TV</div></div>
+  </div>`;
+
+  document.getElementById('tab-week').innerHTML = html;
+}
+
+// ─── PREHAB TAB ──────────────────────────────────────────────
+function renderPrehab() {
+  let html = `
+    <div class="prehab-intro">
+      <h2>Injury Prevention Plan</h2>
+      <p>Built around your specific history: posterior tibial tendon dysfunction (likely partial tear/severe tendinopathy) and Achilles sensitivity. The post-tib band work and calf raises are non-negotiable — they\'re what gets you to the start line healthy.</p>
+    </div>
+    <div class="warning-box">
+      <h3>🔴 Stop Running If You Have...</h3>
+      <div class="warn-item">Sharp or aching pain behind the medial malleolus (inner ankle bone) during or after a run</div>
+      <div class="warn-item">Pain that worsens during a run rather than warming up and settling within 5-10 min</div>
+      <div class="warn-item">Visible swelling around the inside of the ankle</div>
+      <div class="warn-item">Morning Achilles stiffness lasting more than 10-15 minutes</div>
+      <div class="warn-item">Post-tib tenderness that doesn\'t settle within 24 hours of a run</div>
+    </div>
+    <div class="prehab-section">🔴 Critical — Every Gym Session</div>`;
+
+  PREHAB_EXERCISES.filter(e=>e.priority==='critical').forEach(e => { html += exCard(e); });
+  html += `<div class="prehab-section">🟡 High Priority — Weekly</div>`;
+  PREHAB_EXERCISES.filter(e=>e.priority==='high').forEach(e => { html += exCard(e); });
+  html += `<div class="prehab-section">🟢 Daily — 5 Minutes Every Day</div>`;
+  PREHAB_EXERCISES.filter(e=>e.priority==='daily').forEach(e => { html += exCard(e); });
+
+  html += `<div class="gym-schedule">
+    <h3>📅 Weekly Gym Integration</h3>
+    <div class="gs-day">
+      <div class="gs-label">Tuesday & Thursday — Full Body</div>
+      <div class="gs-items">Your existing full-body session<br>+ Single-leg calf raises (straight) 3×15<br>+ Single-leg calf raises (bent knee) 3×15<br>+ Post-tib band work 3×15<br>+ Single-leg RDL 3×10</div>
+    </div>
+    <div class="gs-day">
+      <div class="gs-label">Friday — Everything Else + Prehab</div>
+      <div class="gs-items">Your existing session<br>+ Tibialis anterior band work 3×15<br>+ Foot doming 10×5s holds<br>+ Soleus + gastroc stretches</div>
+    </div>
+    <div class="gs-day">
+      <div class="gs-label">Daily — 5 Minutes (Sofa/Morning)</div>
+      <div class="gs-items">Post-tib band work 3×15 each leg<br>Soleus stretch 3×45s each side<br>Gastrocnemius stretch 3×45s each side<br>Foot doming 10×5s each foot</div>
+    </div>
+  </div>`;
+
+  document.getElementById('tab-prehab').innerHTML = html;
+}
+
+function exCard(e) {
+  return `<div class="ex-card">
+    <div class="ex-card-top">
+      <div class="ex-icon">${e.icon}</div>
+      <div style="flex:1"><div class="ex-title">${e.title}</div><div class="ex-sets">${e.sets}</div></div>
+      <div class="ex-priority p-${e.priority}">${e.lab}</div>
+    </div>
+    <div class="ex-why">${e.why}</div>
+    <div class="ex-when">📅 ${e.when}</div>
+  </div>`;
+}
+
+// ─── INIT ────────────────────────────────────────────────────
+updateRing();
+updateCountdown();
+setInterval(updateCountdown, 60000);
+renderOverview();
+</script>
+
+</body>
+</html>
