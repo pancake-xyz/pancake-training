@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Sub-20 5K</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;900&family=Literata:ital,wght@0,400;0,500;1,400&display=swap');
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  background-color: #080c10;
+  color: #e8edf5;
+  font-family: 'Literata', Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  padding-top: 90px;
+}
+#appHeader {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 999;
+  background-color: #0d1117;
+  border-bottom: 1px solid #1e2535;
+  padding: 10px 16px 0;
+}
+.header-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.brand-title { font-family: 'Barlow Condensed','Arial Narrow',Arial,sans-serif; font-weight: 900; font-size: 1.5rem; letter-spacing: 3px; line-height: 1; color: #3dffa0; }
+.brand-sub { font-family: 'Barlow Condensed','Arial Narrow',Arial,sans-serif; font-size: 0.6rem; color: #5a6a85; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+.header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.countdown-days { font-family: 'Barlow Condensed','Arial Narrow',Arial,sans-serif; font-size: 1.3rem; font-weight: 700; color: #ffe44a; line-height: 1; text-align: right; }
+.countdown-lbl { font-family: 'Barlow Condensed','Arial Narrow',Arial,sans-serif; font-size: 0.55rem; color: #5a6a85; text-transform: uppercase; letter-spacing: 1px; text-align: right; }
+.ring-wrap { width: 44px; height: 44px; flex-shrink: 0; }
+.ring-wrap svg { width: 44px; height: 44px; display: block; }
+.ring-bg { fill: none; stroke: #252d3e; stroke-width: 4; }
+.ring-bar { fill: none; stroke: #3dffa0; stroke-width: 4; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.5s ease; }
+.ring-label { font-family: 'Barlow Condensed','Arial Narrow',Arial,sans-serif; font-size: 10px; font-weight: 700; fill: #3dffa0; dominant-baseline: middle; text-anchor: middle; }
+.tabs { display: flex; border-top: 1px solid #1e2535; margin: 0 -16px; }
+.tab { flex: 1; padding: 9px 2px; text-align: center; font-family: 'Barlow Condensed','Arial Narrow',Arial,sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #5a6a85; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+.tab.active { color: #3dffa0; border-bottom-color: #3dffa0; }
+main { max-width: 540px; margin: 0 auto; padding: 14px 14px 80px; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── STAT STRIP ── */
+.stat-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 16px; }
+.stat-box { background-color: #111620; border: 1px solid #1e2535; border-radius: 10px; padding: 10px 6px; text-align: center; }
+.stat-val { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 1.6rem; font-weight: 700; color: #3dffa0; line-height: 1; display: block; }
+.stat-lbl { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.58rem; color: #5a6a85; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; display: block; }
+
+/* ── PHASE HEADER ── */
+.phase-header { display: flex; align-items: center; gap: 8px; margin: 18px 0 8px; }
+.phase-pip { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.phase-lbl { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+.phase-rule { flex: 1; height: 1px; background-color: #1e2535; }
+
+/* ── WEEK ROW ── */
+.week-row { display: flex; align-items: center; gap: 10px; padding: 12px; background-color: #111620; border: 1px solid #1e2535; border-radius: 10px; margin-bottom: 6px; cursor: pointer; position: relative; overflow: hidden; -webkit-user-select: none; user-select: none; }
+.week-row:active { background-color: #161c28; }
+.week-row.wk-current { border-color: #3dffa0; }
+.week-row.wk-current::before { content:’’; position:absolute; left:0; top:0; bottom:0; width:3px; background-color:#3dffa0; }
+.week-row.wk-done { background-color: #0a1a12; border-color: #1e3a28; }
+.wk-num { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 1.2rem; font-weight: 700; color: #3a4a60; min-width: 28px; flex-shrink: 0; }
+.week-row.wk-current .wk-num { color: #3dffa0; }
+.week-row.wk-done .wk-num { color: #3dffa0; opacity: 0.5; }
+.wk-info { flex: 1; min-width: 0; }
+.wk-focus { font-size: 0.85rem; font-weight: 500; color: #e8edf5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wk-date { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.65rem; color: #5a6a85; margin-top: 2px; }
+.wk-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+.wk-km { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.78rem; font-weight: 600; color: #5a6a85; }
+.wk-dots { display: flex; gap: 4px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid #252d3e; background-color: transparent; }
+.dot.d-interval { border-color: #ff7c3a; }
+.dot.d-tempo    { border-color: #5b9fff; }
+.dot.d-easy     { border-color: #2a5a40; }
+.dot.d-long     { border-color: #ffe44a; }
+.dot.d-race     { border-color: #ff4a6a; }
+.dot.d-done     { background-color: #3dffa0; border-color: #3dffa0; }
+.wk-arrow { color: #3a4a60; font-size: 1.1rem; flex-shrink: 0; }
+.recovery-badge { display: inline-block; font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.58rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background-color: #1a2535; color: #5b9fff; border: 1px solid #253550; margin-left: 5px; vertical-align: middle; }
+
+/* ── WEEK DETAIL ── */
+.back-btn { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; color: #5a6a85; font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; padding: 0; margin-bottom: 12px; }
+.week-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+.nav-btn { background-color: #111620; border: 1px solid #1e2535; color: #e8edf5; font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 8px 14px; border-radius: 8px; cursor: pointer; flex-shrink: 0; }
+.nav-btn:disabled { opacity: 0.2; pointer-events: none; }
+.nav-lbl { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 2px; color: #5a6a85; text-transform: uppercase; text-align: center; }
+.week-summary { background-color: #111620; border: 1px solid #1e2535; border-radius: 14px; padding: 16px; margin-bottom: 10px; }
+.ws-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.ws-phase { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; }
+.ws-title { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 1.7rem; font-weight: 900; letter-spacing: 1px; line-height: 1; color: #e8edf5; }
+.ws-date { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.68rem; color: #5a6a85; margin-top: 4px; }
+.ws-km { text-align: right; flex-shrink: 0; }
+.ws-km-val { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 2.2rem; font-weight: 900; color: #ffe44a; line-height: 1; }
+.ws-km-lbl { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.58rem; color: #5a6a85; text-transform: uppercase; letter-spacing: 1px; }
+.coach-note { font-size: 0.8rem; color: #b0bcd0; line-height: 1.65; font-style: italic; padding-top: 10px; border-top: 1px solid #1e2535; }
+.coach-note strong { font-style: normal; color: #3dffa0; font-weight: 600; }
+.km-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.km-pill { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.7rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; background-color: #161c28; border: 1px solid #252d3e; color: #5a6a85; }
+.km-pill.done { color: #3dffa0; border-color: #1e4a30; background-color: #0a1a12; }
+.injury-flag { display: flex; gap: 10px; align-items: flex-start; background-color: #1a0e0a; border: 1px solid #4a2020; border-left: 3px solid #ff4a6a; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+.flag-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.flag-text { font-size: 0.75rem; color: #ffb0b8; line-height: 1.55; }
+.flag-text strong { color: #ff4a6a; font-style: normal; }
+
+/* ── SESSION CARDS ── */
+.session-card { background-color: #111620; border: 1px solid #1e2535; border-radius: 12px; padding: 14px; margin-bottom: 8px; }
+.session-card.s-done { background-color: #0a1a12; border-color: #1e3a28; opacity: 0.82; }
+.session-card.s-optional { border-style: dashed; border-color: #252d3e; }
+.s-row { display: flex; align-items: flex-start; gap: 10px; }
+.s-body { flex: 1; min-width: 0; }
+.s-badges { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+.s-badge { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; }
+.badge-interval { background-color: #2a1a0a; color: #ff7c3a; border: 1px solid #4a2a10; }
+.badge-tempo    { background-color: #0a1525; color: #5b9fff; border: 1px solid #152540; }
+.badge-easy     { background-color: #0a1a12; color: #3dffa0; border: 1px solid #153525; }
+.badge-long     { background-color: #1a1800; color: #ffe44a; border: 1px solid #3a3500; }
+.badge-race     { background-color: #1a0a10; color: #ff4a6a; border: 1px solid #3a1020; }
+.badge-opt { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.6rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #5a6a85; border: 1px solid #252d3e; padding: 2px 6px; border-radius: 4px; background-color: transparent; }
+.s-day { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.63rem; color: #5a6a85; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+.s-workout { font-size: 0.88rem; font-weight: 500; color: #e8edf5; line-height: 1.4; }
+.session-card.s-done .s-workout { text-decoration: line-through; color: #5a6a85; }
+.s-km { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.65rem; color: #5a6a85; margin-top: 4px; }
+.tick-btn { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #252d3e; background-color: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: #5a6a85; flex-shrink: 0; transition: all 0.15s; -webkit-appearance: none; }
+.tick-btn.ticked { background-color: #3dffa0; border-color: #3dffa0; color: #080c10; font-weight: 700; }
+.s-tip { margin-top: 10px; padding-top: 10px; border-top: 1px solid #1e2535; font-size: 0.75rem; color: #5a6a85; line-height: 1.6; font-style: italic; }
+.s-tip::before { content: ’💡 ’; font-style: normal; }
+
+/* ── GYM CARD ── */
+.gym-card { background-color: #0f1420; border: 1px solid #1e2535; border-radius: 12px; padding: 14px; margin-bottom: 8px; }
+.gym-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.gym-head-title { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.88rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #5b9fff; }
+.gym-head-sub { margin-left: auto; font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.65rem; color: #5a6a85; }
+.gym-sec { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #3a4a60; margin: 10px 0 5px; padding-bottom: 3px; border-bottom: 1px solid #1e2535; }
+.gym-item { margin-bottom: 6px; }
+.gym-item-name { font-size: 0.82rem; font-weight: 500; color: #e8edf5; font-family: ‘Literata’, Georgia, serif; }
+.gym-item-detail { font-size: 0.7rem; color: #5a6a85; margin-top: 1px; font-family: ‘Literata’, Georgia, serif; }
+
+/* ── RACE BANNER ── */
+.race-banner { background-color: #1a0a10; border: 1px solid #4a1020; border-radius: 14px; padding: 20px; text-align: center; margin-bottom: 8px; }
+.race-emoji { font-size: 2rem; display: block; margin-bottom: 6px; }
+.race-title { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 2.2rem; font-weight: 900; letter-spacing: 4px; color: #ff4a6a; line-height: 1; margin-bottom: 8px; }
+.race-sub { font-size: 0.8rem; color: #8a7a85; line-height: 1.6; margin-bottom: 14px; }
+.race-tick { width: 46px; height: 46px; border-radius: 50%; border: 2px solid #4a1020; background-color: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #5a6a85; margin: 0 auto; -webkit-appearance: none; }
+.race-tick.ticked { background-color: #ff4a6a; border-color: #ff4a6a; color: white; }
+
+/* ── PREHAB TAB ── */
+.prehab-intro { background-color: #111620; border: 1px solid #1e2535; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.prehab-intro h2 { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 1.4rem; font-weight: 900; letter-spacing: 1px; color: #5b9fff; margin-bottom: 6px; }
+.prehab-intro p { font-size: 0.8rem; color: #b0bcd0; line-height: 1.65; }
+.prehab-sec-label { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #5a6a85; margin: 16px 0 8px; }
+.ex-card { background-color: #111620; border: 1px solid #1e2535; border-radius: 12px; padding: 14px; margin-bottom: 8px; }
+.ex-card-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.ex-icon { font-size: 1.2rem; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background-color: #161c28; border-radius: 8px; flex-shrink: 0; }
+.ex-info { flex: 1; }
+.ex-title { font-size: 0.88rem; font-weight: 500; color: #e8edf5; line-height: 1.3; }
+.ex-sets { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.7rem; color: #5b9fff; font-weight: 600; margin-top: 2px; }
+.ex-badge { flex-shrink: 0; font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.58rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; }
+.ex-badge.critical { background-color: #2a0a10; color: #ff4a6a; }
+.ex-badge.high     { background-color: #1a1800; color: #ffe44a; }
+.ex-badge.daily    { background-color: #0a1a12; color: #3dffa0; }
+.ex-why { font-size: 0.75rem; color: #5a6a85; line-height: 1.6; font-style: italic; padding-top: 8px; border-top: 1px solid #1e2535; }
+.ex-when { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.65rem; color: #3a4a60; margin-top: 5px; }
+.warn-box { background-color: #1a0e0a; border: 1px solid #4a2020; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.warn-box h3 { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #ff4a6a; margin-bottom: 8px; }
+.warn-item { display: flex; gap: 8px; margin-bottom: 6px; font-size: 0.78rem; color: #ffb0b8; line-height: 1.5; }
+.warn-item::before { content: ‘⚠’; flex-shrink: 0; }
+.gym-sched { background-color: #111620; border: 1px solid #1e2535; border-radius: 12px; padding: 14px; margin-bottom: 8px; }
+.gym-sched h3 { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #5b9fff; margin-bottom: 10px; }
+.gs-day { margin-bottom: 10px; }
+.gs-day-label { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #ffe44a; margin-bottom: 4px; }
+.gs-day-items { font-size: 0.78rem; color: #b0bcd0; line-height: 1.8; }
+
+/* ── TODAY TAB ── */
+.today-header {
+background-color: #111620;
+border: 1px solid #1e2535;
+border-radius: 14px;
+padding: 16px;
+margin-bottom: 12px;
+display: flex;
+align-items: flex-start;
+justify-content: space-between;
+gap: 12px;
+}
+.today-date-block {}
+.today-dayname {
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 2rem;
+font-weight: 900;
+color: #3dffa0;
+line-height: 1;
+letter-spacing: 2px;
+}
+.today-datestr {
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 0.7rem;
+color: #5a6a85;
+letter-spacing: 1px;
+margin-top: 3px;
+}
+.today-week-badge {
+background-color: #161c28;
+border: 1px solid #252d3e;
+border-radius: 8px;
+padding: 8px 12px;
+text-align: right;
+flex-shrink: 0;
+}
+.today-week-badge .wbig {
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 1.4rem;
+font-weight: 900;
+color: #ffe44a;
+line-height: 1;
+}
+.today-week-badge .wsmall {
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 0.58rem;
+color: #5a6a85;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+.streak-bar {
+background-color: #111620;
+border: 1px solid #1e2535;
+border-radius: 12px;
+padding: 12px 14px;
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+gap: 12px;
+}
+.streak-flame { font-size: 1.4rem; flex-shrink: 0; }
+.streak-text { flex: 1; }
+.streak-num {
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 1.3rem;
+font-weight: 900;
+color: #ff7c3a;
+line-height: 1;
+}
+.streak-lbl {
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 0.65rem;
+color: #5a6a85;
+letter-spacing: 0.5px;
+margin-top: 1px;
+}
+.streak-dots { display: flex; gap: 4px; flex-shrink: 0; }
+.sd { width: 9px; height: 9px; border-radius: 50%; background-color: #1e2535; }
+.sd.on { background-color: #ff7c3a; }
+.sd.today-on { background-color: #3dffa0; }
+.rest-day-card {
+background-color: #111620;
+border: 1px solid #1e2535;
+border-radius: 14px;
+padding: 20px 16px;
+text-align: center;
+margin-bottom: 12px;
+}
+.rest-day-icon { font-size: 2rem; display: block; margin-bottom: 8px; }
+.rest-day-title {
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 1.5rem;
+font-weight: 900;
+letter-spacing: 2px;
+color: #5a6a85;
+margin-bottom: 6px;
+}
+.rest-day-sub { font-size: 0.8rem; color: #3a4a60; line-height: 1.6; }
+.today-section-label {
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 0.65rem;
+font-weight: 700;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: #5a6a85;
+margin: 14px 0 8px;
+}
+/* Prehab checklist item */
+.prehab-check-item {
+display: flex;
+align-items: flex-start;
+gap: 10px;
+padding: 11px 12px;
+background-color: #111620;
+border: 1px solid #1e2535;
+border-radius: 10px;
+margin-bottom: 6px;
+cursor: pointer;
+-webkit-user-select: none;
+user-select: none;
+transition: background-color 0.15s;
+}
+.prehab-check-item.checked {
+background-color: #0a1a12;
+border-color: #1e3a28;
+opacity: 0.75;
+}
+.prehab-check-item.checked .pci-name {
+text-decoration: line-through;
+color: #5a6a85;
+}
+.pci-tick {
+width: 24px; height: 24px;
+border-radius: 6px;
+border: 2px solid #252d3e;
+background-color: transparent;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 0.75rem;
+color: transparent;
+flex-shrink: 0;
+margin-top: 1px;
+transition: all 0.15s;
+}
+.prehab-check-item.checked .pci-tick {
+background-color: #3dffa0;
+border-color: #3dffa0;
+color: #080c10;
+}
+.pci-body { flex: 1; }
+.pci-name { font-size: 0.83rem; font-weight: 500; color: #e8edf5; line-height: 1.3; }
+.pci-detail { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.65rem; color: #5a6a85; margin-top: 2px; }
+.pci-badge {
+flex-shrink: 0;
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 0.55rem;
+font-weight: 700;
+letter-spacing: 0.8px;
+text-transform: uppercase;
+padding: 2px 6px;
+border-radius: 4px;
+align-self: flex-start;
+}
+.pcb-critical { background-color: #2a0a10; color: #ff4a6a; }
+.pcb-high     { background-color: #1a1800; color: #ffe44a; }
+.pcb-daily    { background-color: #0a1a12; color: #3dffa0; }
+.prehab-all-done {
+background-color: #0a1a12;
+border: 1px solid #1e4a30;
+border-radius: 12px;
+padding: 14px;
+text-align: center;
+margin-bottom: 8px;
+}
+.prehab-all-done-icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+.prehab-all-done-text {
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 1rem;
+font-weight: 700;
+letter-spacing: 1px;
+color: #3dffa0;
+}
+
+/* ── RACE DAY SURPRISE ── */
+.race-day-full {
+text-align: center;
+padding: 10px 0 20px;
+}
+.rdf-stars { font-size: 1.5rem; margin-bottom: 16px; letter-spacing: 4px; }
+.rdf-big {
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 3.5rem;
+font-weight: 900;
+letter-spacing: 4px;
+color: #ff4a6a;
+line-height: 1;
+margin-bottom: 4px;
+}
+.rdf-sub {
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 1.1rem;
+font-weight: 700;
+letter-spacing: 3px;
+color: #ffe44a;
+margin-bottom: 20px;
+text-transform: uppercase;
+}
+.rdf-card {
+background-color: #1a0a10;
+border: 1px solid #4a1020;
+border-radius: 14px;
+padding: 18px;
+margin-bottom: 12px;
+text-align: left;
+}
+.rdf-card-title {
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 0.7rem;
+font-weight: 700;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: #ff4a6a;
+margin-bottom: 8px;
+}
+.rdf-card-body { font-size: 0.85rem; color: #e8edf5; line-height: 1.7; }
+.rdf-card-body strong { color: #3dffa0; font-style: normal; }
+.rdf-splits {
+display: grid;
+grid-template-columns: repeat(5, 1fr);
+gap: 6px;
+margin: 12px 0;
+}
+.rdf-split {
+background-color: #111620;
+border: 1px solid #252d3e;
+border-radius: 8px;
+padding: 8px 4px;
+text-align: center;
+}
+.rdf-split .km { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.65rem; color: #5a6a85; display: block; }
+.rdf-split .pace { font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif; font-size: 0.9rem; font-weight: 700; color: #ffe44a; display: block; }
+.rdf-split.key { border-color: #ff4a6a; }
+.rdf-split.key .pace { color: #ff4a6a; }
+.race-done-btn {
+width: 100%;
+padding: 16px;
+background-color: #ff4a6a;
+border: none;
+border-radius: 12px;
+font-family: ‘Barlow Condensed’,‘Arial Narrow’,Arial,sans-serif;
+font-size: 1.1rem;
+font-weight: 900;
+letter-spacing: 3px;
+text-transform: uppercase;
+color: white;
+cursor: pointer;
+margin-top: 8px;
+}
+.race-done-btn.done { background-color: #3dffa0; color: #080c10; }
+</style>
+
+</head>
+<body>
+
+<header id="appHeader">
+  <div class="header-top">
+    <div>
+      <div class="brand-title">Sub-20 5K</div>
+      <div class="brand-sub">18 Weeks · 4 Sessions · Injury Smart</div>
+    </div>
+    <div class="header-right">
+      <div>
+        <div class="countdown-days" id="daysLeft">—</div>
+        <div class="countdown-lbl">to race</div>
+      </div>
+      <div class="ring-wrap">
+        <svg viewBox="0 0 44 44">
+          <circle class="ring-bg" cx="22" cy="22" r="18"/>
+          <circle class="ring-bar" id="ringBar" cx="22" cy="22" r="18"
+            stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
+          <text class="ring-label" id="ringPct" x="22" y="22">0%</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('today')">Today</button>
+    <button class="tab" onclick="switchTab('overview')">Plan</button>
+    <button class="tab" onclick="switchTab('week')">This Week</button>
+    <button class="tab" onclick="switchTab('prehab')">Prehab</button>
+  </div>
+</header>
+
+<main>
+  <div class="view active" id="tab-today"></div>
+  <div class="view" id="tab-overview"></div>
+  <div class="view" id="tab-week"></div>
+  <div class="view" id="tab-prehab"></div>
+</main>
+
+<script>
+// ── Header offset ──
+function fixHeaderOffset() {
+  document.body.style.paddingTop = document.getElementById('appHeader').offsetHeight + 'px';
+}
+fixHeaderOffset();
+window.addEventListener('resize', fixHeaderOffset);
+
+// ── Dates ──
+var START = new Date('2026-03-09T00:00:00');
+var RACE  = new Date('2026-06-28T00:00:00');
+
+function weekStart(n) { var d=new Date(START); d.setDate(d.getDate()+(n-1)*7); return d; }
+function fmtDate(d) { return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}); }
+function weekRange(n) { var s=weekStart(n); var e=new Date(s); e.setDate(e.getDate()+6); return fmtDate(s)+' \u2013 '+fmtDate(e); }
+
+// What training week number is today? (1-18, or 0 if before, 19 if after)
+function trainingWeekOf(date) {
+  var d = new Date(date); d.setHours(0,0,0,0);
+  var s = new Date(START); s.setHours(0,0,0,0);
+  var diff = Math.floor((d - s) / 86400000);
+  if (diff < 0) return 0;
+  var wn = Math.floor(diff / 7) + 1;
+  return Math.min(wn, 18);
+}
+
+// Day of week: 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+var DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+// ── PREHAB DEFINITIONS ──
+// Each item: {id, icon, name, detail, priority, days}
+// days: array of day names when this appears, or 'daily' for every day
+var PREHAB_ITEMS = [
+  // GYM days (Tue + Thu)
+  {id:'clf_str', icon:'🦵', name:'Calf Raises — Straight Leg', detail:'3×15 per leg · 3-3-3 slow tempo', priority:'critical', days:['Tuesday','Thursday']},
+  {id:'clf_bnt', icon:'🦵', name:'Calf Raises — Bent Knee (Soleus)', detail:'3×15 per leg · slow tempo', priority:'critical', days:['Tuesday','Thursday']},
+  {id:'ptib_gym', icon:'🦶', name:'Post-Tib Band Work', detail:'3×15 per leg · controlled', priority:'critical', days:['Tuesday','Thursday','Friday']},
+  {id:'rdl',     icon:'🏋️', name:'Single-Leg Romanian Deadlift', detail:'3×10 per leg · light-moderate', priority:'high', days:['Tuesday','Thursday']},
+  // Friday specific
+  {id:'tib_ant', icon:'💪', name:'Tibialis Anterior Band Work', detail:'3×15 per leg', priority:'high', days:['Friday']},
+  {id:'foot_dom_fri', icon:'🦶', name:'Foot Doming / Short Foot', detail:'10×5s holds each foot', priority:'high', days:['Friday']},
+  // Daily
+  {id:'sol_str', icon:'🧘', name:'Soleus Stretch — Bent Knee', detail:'3×45s each side', priority:'daily', days:'daily'},
+  {id:'gas_str', icon:'🧘', name:'Gastrocnemius Stretch', detail:'3×45s each side', priority:'daily', days:'daily'},
+  {id:'ptib_sofa', icon:'🦶', name:'Post-Tib Band Work (Sofa)', detail:'3×15 per leg · evening routine', priority:'daily', days:'daily'},
+  {id:'foot_dom', icon:'🦶', name:'Foot Doming', detail:'10×5s holds each foot', priority:'daily', days:'daily'}
+];
+
+function getPrehab(dayName) {
+  return PREHAB_ITEMS.filter(function(p) {
+    return p.days === 'daily' || p.days.indexOf(dayName) !== -1;
+  });
+}
+
+// ── PLAN DATA ──
+var WEEKS = [
+ {n:1,phase:'base',focus:'Aerobic Foundation',totalKm:32,cutback:false,
+  injuryFlag:null,
+  note:'First week of the plan. <strong>Tempo-only</strong> \u2014 no intervals yet. This protects your post-tib from the reactive load of speed work before it\'s ready. Easy days must be genuinely easy: you should be able to hold a full conversation. Wednesday is optional \u2014 do it if you can, skip it freely if not.',
+  sessions:[
+   {day:'Tuesday',  type:'tempo',    workout:'W/U 1.5km \u00b7 20 min @4:40/km \u00b7 C/D 1.5km', km:7.5, optional:false, tip:'4:40/km is comfortably hard \u2014 about 6/10 effort. You should be able to say 3\u20134 words but not a sentence. Always include the warm-up and cool-down jog.'},
+   {day:'Wednesday',type:'easy',     workout:'8\u201310 km easy (club run or solo)', km:9, optional:true, tip:'Genuinely easy. Club 10km if you can make it; solo run or skip entirely if not. Never push pace on this run.'},
+   {day:'Friday',   type:'easy',     workout:'6 km easy', km:6, optional:false, tip:'Easy run to keep legs moving between sessions. Conversational pace.'},
+   {day:'Sunday',   type:'long',     workout:'10 km easy', km:10, optional:false, tip:'Relaxed long run. Time on feet is what matters, not pace.'}
+  ]},
+ {n:2,phase:'base',focus:'Building the Base',totalKm:34,cutback:false,
+  injuryFlag:null,
+  note:'Marginal progressions across every session. The tempo gets slightly longer, the long run grows by 1km. <strong>Keep Wednesday genuinely easy</strong> \u2014 it\'s aerobic top-up mileage, not a workout.',
+  sessions:[
+   {day:'Tuesday',  type:'tempo', workout:'W/U 1.5km \u00b7 22 min @4:38/km \u00b7 C/D 1.5km', km:8, optional:false, tip:'2 minutes longer and marginally faster than week 1. Pace it evenly \u2014 no surges at the end.'},
+   {day:'Wednesday',type:'easy',  workout:'8\u201310 km easy (optional)', km:9, optional:true, tip:'Optional club run or solo easy. Skip if legs feel heavy.'},
+   {day:'Friday',   type:'easy',  workout:'6 km easy', km:6, optional:false, tip:'Easy run. Check in with how your shins and ankles feel.'},
+   {day:'Sunday',   type:'long',  workout:'11 km easy', km:11, optional:false, tip:'1km further than last week. Consistent long-run progression is your biggest aerobic investment.'}
+  ]},
+ {n:3,phase:'base',focus:'First Interval Session',totalKm:33,cutback:false,
+  injuryFlag:'First interval week. Your post-tib is most vulnerable when introducing speed work. <strong>If you feel any tenderness behind the inner ankle before or during Tuesday\'s session, replace it with an easy run.</strong>',
+  note:'<strong>Intervals arrive \u2014 treat this session with respect.</strong> 400m reps at 4:05/km. Check in carefully with how your legs feel the morning after.',
+  sessions:[
+   {day:'Tuesday',  type:'interval', workout:'W/U 1.5km \u00b7 5\u00d7400m @4:05/km (90s jog) \u00b7 C/D 1km', km:7, optional:false, tip:'Short, controlled reps. 90s jog between each. 7/10 effort \u2014 not maximal. Note how your shins and ankles feel during and the morning after.'},
+   {day:'Wednesday',type:'easy',     workout:'8 km easy (optional \u2014 check legs first)', km:8, optional:true, tip:'Optional. Any inner ankle tenderness from Tuesday = skip this entirely.'},
+   {day:'Friday',   type:'easy',     workout:'6 km easy', km:6, optional:false, tip:'Easy run. Your legs are adapting to interval stimulus \u2014 keep this genuinely easy.'},
+   {day:'Sunday',   type:'long',     workout:'12 km easy', km:12, optional:false, tip:'Longest run so far. Keep effort easy. Your body is absorbing a new training stimulus this week.'}
+  ]},
+ {n:4,phase:'base',focus:'Cutback Week',totalKm:27,cutback:true,
+  injuryFlag:null,
+  note:'<strong>Deliberate cutback week.</strong> Tendons adapt slower than cardiovascular fitness \u2014 this week lets everything catch up. Do not add extra running.',
+  sessions:[
+   {day:'Tuesday',  type:'tempo', workout:'W/U 1km \u00b7 18 min @4:40/km \u00b7 C/D 1km', km:6.5, optional:false, tip:'Shorter and easier tempo. Cutback week means cutback week.'},
+   {day:'Wednesday',type:'easy',  workout:'6 km easy (optional)', km:6, optional:true, tip:'Optional and short. Only go if you feel genuinely fresh.'},
+   {day:'Friday',   type:'easy',  workout:'5 km easy', km:5, optional:false, tip:'Short easy run. Legs should feel noticeably fresher by Friday of a cutback week.'},
+   {day:'Sunday',   type:'long',  workout:'9 km easy', km:9, optional:false, tip:'Shortest long run in the plan. Deliberate and intentional. Enjoy it.'}
+  ]},
+ {n:5,phase:'base',focus:'Base Consolidation',totalKm:38,cutback:false,
+  injuryFlag:null,
+  note:'Back to building after the cutback. 25-minute tempo at 4:35/km and a 13km long run. Your aerobic engine is now solid enough for the build phase.',
+  sessions:[
+   {day:'Tuesday',  type:'tempo', workout:'W/U 1.5km \u00b7 25 min @4:35/km \u00b7 C/D 1.5km', km:9, optional:false, tip:'Longest and sharpest tempo of the base phase. Start slightly conservative and build into the effort.'},
+   {day:'Wednesday',type:'easy',  workout:'8\u201310 km easy (optional)', km:9, optional:true, tip:'Optional club run. A great week to go \u2014 you\'re fresh from the cutback.'},
+   {day:'Friday',   type:'easy',  workout:'7 km easy', km:7, optional:false, tip:'Easy run with slightly more volume than earlier weeks.'},
+   {day:'Sunday',   type:'long',  workout:'13 km easy', km:13, optional:false, tip:'Progressive long run. Strong aerobic base is the foundation sub-20 is built on.'}
+  ]},
+ {n:6,phase:'build',focus:'1km Repeats Begin',totalKm:37,cutback:false,
+  injuryFlag:'Build phase begins. Mileage and intensity both increase. <strong>Monitor your post-tib closely every week.</strong> Inner ankle tenderness = swap interval session for easy run.',
+  note:'<strong>Welcome to the build phase.</strong> 1km repeats are the single most important interval session for sub-20. This interval week is followed by a tempo week.',
+  sessions:[
+   {day:'Tuesday',  type:'interval', workout:'W/U 1.5km \u00b7 4\u00d71km @4:08/km (2 min jog) \u00b7 C/D 1km', km:8, optional:false, tip:'1km reps \u2014 the workhorse session. Pace the first 400m conservatively. 2-min jog recovery between reps.'},
+   {day:'Wednesday',type:'easy',     workout:'8\u201310 km easy (optional)', km:9, optional:true, tip:'Optional. Do not do this if your legs feel heavy from Tuesday\'s 1km reps.'},
+   {day:'Friday',   type:'easy',     workout:'7 km easy', km:7, optional:false, tip:'Easy run. Building weekly mileage alongside quality sessions.'},
+   {day:'Sunday',   type:'long',     workout:'13 km easy', km:13, optional:false, tip:'Consistent long run. Aerobic base building alongside your speed work.'}
+  ]},
+ {n:7,phase:'build',focus:'Threshold Development',totalKm:39,cutback:false,
+  injuryFlag:null,
+  note:'Tempo week. 3\u00d78 min broken tempo is easier to pace than continuous running. Interval weeks stress your neuromuscular system; tempo weeks target lactate threshold.',
+  sessions:[
+   {day:'Tuesday',  type:'tempo', workout:'W/U 1.5km \u00b7 3\u00d78 min @4:35/km (90s jog) \u00b7 C/D 1.5km', km:9, optional:false, tip:'3 blocks of 8 minutes. Each one should feel like the same effort. 90-second jog recovery between sets.'},
+   {day:'Wednesday',type:'easy',  workout:'8\u201310 km easy (optional)', km:9, optional:true, tip:'Optional. Good week to go if feeling fresh.'},
+   {day:'Friday',   type:'easy',  workout:'7 km easy', km:7, optional:false, tip:'Easy run. Tuesday\'s tempo is the quality work this week.'},
+   {day:'Sunday',   type:'long',  workout:'14 km easy', km:14, optional:false, tip:'First 14km long run. Time on feet at easy effort is a powerful fitness builder.'}
+  ]},
+ {n:8,phase:'build',focus:'Longer Intervals',totalKm:38,cutback:false,
+  injuryFlag:'Mileage is above your previous peak. <strong>Wednesday is especially optional this week.</strong> Skip it without guilt if there is any lower-leg fatigue.',
+  note:'1200m reps demand better pacing discipline. <strong>Wednesday is your most skippable session</strong> this week given the total load.',
+  sessions:[
+   {day:'Tuesday',  type:'interval', workout:'W/U 1.5km \u00b7 4\u00d71200m @4:05/km (2 min jog) \u00b7 C/D 1km', km:9, optional:false, tip:'Pace the first 400m at 4:08 then settle to 4:05. Consistency across all 4 reps is the goal.'},
+   {day:'Wednesday',type:'easy',     workout:'6\u20138 km easy (optional \u2014 skip if fatigued)', km:8, optional:true, tip:'SKIP if legs are heavy or there is any post-tib tenderness.'},
+   {day:'Friday',   type:'easy',     workout:'7 km easy', km:7, optional:false, tip:'Easy run. Check in with your post-tib and shins before going.'},
+   {day:'Sunday',   type:'long',     workout:'14 km easy', km:14, optional:false, tip:'Hold 14km at easy effort.'}
+  ]},
+ {n:9,phase:'build',focus:'Cutback Week',totalKm:28,cutback:true,
+  injuryFlag:null,
+  note:'<strong>Second cutback week \u2014 and the most important one.</strong> You\'ve pushed above your previous peak mileage and introduced 1200m reps. Tendons are remodelling. Use the extra energy for prehab.',
+  sessions:[
+   {day:'Tuesday',  type:'tempo', workout:'W/U 1km \u00b7 20 min @4:38/km \u00b7 C/D 1km', km:7, optional:false, tip:'Easy tempo in a cutback week. Controlled and comfortable.'},
+   {day:'Wednesday',type:'easy',  workout:'6 km easy (optional)', km:6, optional:true, tip:'Short and easy if you go. No pressure to run.'},
+   {day:'Friday',   type:'easy',  workout:'5 km easy', km:5, optional:false, tip:'Short easy run. Legs should feel noticeably fresher.'},
+   {day:'Sunday',   type:'long',  workout:'10 km easy', km:10, optional:false, tip:'Short long run. Your body is getting stronger \u2014 the cutback is doing its job.'}
+  ]},
+ {n:10,phase:'build',focus:'Race Pace Arrives',totalKm:42,cutback:false,
+  injuryFlag:'First week at 4:00/km \u2014 actual race pace. <strong>Pay close attention to how your post-tib responds the morning after Tuesday\'s session.</strong>',
+  note:'<strong>Race pace arrives.</strong> 5\u00d71km at 4:00/km is the defining session. If the reps feel impossible, back off to 4:03/km. Fitness will come.',
+  sessions:[
+   {day:'Tuesday',  type:'interval', workout:'W/U 1.5km \u00b7 5\u00d71km @4:00/km (2 min jog) \u00b7 C/D 1km', km:9.5, optional:false, tip:'This is your 5K race pace. Run rep 1 at 4:02 as a check, then settle to 4:00.'},
+   {day:'Wednesday',type:'easy',     workout:'8\u201310 km easy (optional)', km:9, optional:true, tip:'Optional. Do a thorough post-tib check before going.'},
+   {day:'Friday',   type:'easy',     workout:'8 km easy', km:8, optional:false, tip:'Easy run. Higher volume now as you approach peak mileage.'},
+   {day:'Sunday',   type:'long',     workout:'15 km easy', km:15, optional:false, tip:'Longest long run in the plan. You should feel like you could comfortably go further.'}
+  ]},
+ {n:11,phase:'build',focus:'Peak Training Week',totalKm:42,cutback:false,
+  injuryFlag:'Peak load week. <strong>Sleep, nutrition, and prehab are non-negotiable this week.</strong> Any post-tib or Achilles whisper = mandatory day off.',
+  note:'<strong>This is the top of the mountain.</strong> A 28-minute continuous tempo at 4:33/km is your biggest single session. This week will feel tough. That\'s the point.',
+  sessions:[
+   {day:'Tuesday',  type:'tempo', workout:'W/U 1.5km \u00b7 28 min @4:33/km \u00b7 C/D 1.5km', km:10, optional:false, tip:'Your hardest tempo of the plan. Start at 6/10 effort \u2014 it will build naturally.'},
+   {day:'Wednesday',type:'easy',  workout:'8\u201310 km easy (optional)', km:9, optional:true, tip:'Optional. Useful this week \u2014 easy miles support recovery from Tuesday\'s big session.'},
+   {day:'Friday',   type:'easy',  workout:'8 km easy', km:8, optional:false, tip:'Easy run at peak mileage week.'},
+   {day:'Sunday',   type:'long',  workout:'15 km easy', km:15, optional:false, tip:'Second week at 15km. After this, long runs begin to drop.'}
+  ]},
+ {n:12,phase:'sharpen',focus:'Sharpening Phase Begins',totalKm:35,cutback:false,
+  injuryFlag:null,
+  note:'<strong>Volume drops, pace sharpens.</strong> 6\u00d7400m at 3:55/km is faster than race pace, training your legs to turn over quickly.',
+  sessions:[
+   {day:'Tuesday',  type:'interval', workout:'W/U 1.5km \u00b7 6\u00d7400m @3:55/km (90s jog) \u00b7 C/D 1km', km:7.5, optional:false, tip:'Faster than race pace. 400m at 3:55/km \u2248 94 seconds. Quick and snappy.'},
+   {day:'Wednesday',type:'easy',     workout:'8 km easy (optional)', km:8, optional:true, tip:'Optional. Volume is coming down in this phase.'},
+   {day:'Friday',   type:'easy',     workout:'7 km easy', km:7, optional:false, tip:'Easy run. Legs should be feeling sharper and fresher as volume drops.'},
+   {day:'Sunday',   type:'long',     workout:'13 km easy', km:13, optional:false, tip:'Long run drops. You\'re banking your fitness.'}
+  ]},
+ {n:13,phase:'sharpen',focus:'Tempo Confidence',totalKm:36,cutback:false,
+  injuryFlag:null,
+  note:'Tempo week with faster pace \u2014 4:28/km. The same 25-minute duration at a pace you couldn\'t have held 8 weeks ago.',
+  sessions:[
+   {day:'Tuesday',  type:'tempo', workout:'W/U 1.5km \u00b7 25 min @4:28/km \u00b7 C/D 1.5km', km:8.5, optional:false, tip:'Faster tempo \u2014 same duration, sharper pace. If it feels easy, your fitness is excellent.'},
+   {day:'Wednesday',type:'easy',  workout:'8 km easy (optional)', km:8, optional:true, tip:'Optional easy run.'},
+   {day:'Friday',   type:'easy',  workout:'7 km easy', km:7, optional:false, tip:'Easy run. Legs feeling increasingly fresh as phase volume drops.'},
+   {day:'Sunday',   type:'long',  workout:'13 km easy', km:13, optional:false, tip:'Consistent 13km. Maintaining base while sharpening speed.'}
+  ]},
+ {n:14,phase:'sharpen',focus:'Race-Specific Repeats',totalKm:34,cutback:false,
+  injuryFlag:null,
+  note:'3\u00d71600m at 4:00/km \u2014 race pace for nearly a mile. Control the first 800m of each rep and the back half will take care of itself.',
+  sessions:[
+   {day:'Tuesday',  type:'interval', workout:'W/U 1.5km \u00b7 3\u00d71600m @4:00/km (2.5 min jog) \u00b7 C/D 1km', km:9, optional:false, tip:'1600m at race pace. Hold back in the first 800m. 2.5-minute jog recovery.'},
+   {day:'Wednesday',type:'easy',     workout:'6\u20138 km easy (optional)', km:7, optional:true, tip:'Optional and short.'},
+   {day:'Friday',   type:'easy',     workout:'6 km easy', km:6, optional:false, tip:'Easy run. Volume continuing to drop.'},
+   {day:'Sunday',   type:'long',     workout:'12 km easy', km:12, optional:false, tip:'The fitness is built.'}
+  ]},
+ {n:15,phase:'sharpen',focus:'Speed Reserve',totalKm:32,cutback:false,
+  injuryFlag:null,
+  note:'Sub-race-pace 800m reps build your speed reserve. <strong>You should feel genuinely fast this week.</strong>',
+  sessions:[
+   {day:'Tuesday',  type:'interval', workout:'W/U 1.5km \u00b7 6\u00d7800m @3:55/km (90s jog) \u00b7 C/D 1km', km:8, optional:false, tip:'Sub-race-pace 800s. Fast and clean \u2014 not desperate.'},
+   {day:'Wednesday',type:'easy',     workout:'6\u20137 km easy (optional)', km:7, optional:true, tip:'Optional easy run.'},
+   {day:'Friday',   type:'easy',     workout:'6 km easy', km:6, optional:false, tip:'Easy run. Legs should be feeling springy as taper approaches.'},
+   {day:'Sunday',   type:'long',     workout:'11 km easy', km:11, optional:false, tip:'Volume continuing to reduce. Fitness built and being banked.'}
+  ]},
+ {n:16,phase:'sharpen',focus:'Final Quality Week',totalKm:30,cutback:false,
+  injuryFlag:null,
+  note:'<strong>The hay is in the barn.</strong> 4\u00d71km at 3:58/km. After Sunday\'s long run, you\'ve done everything you need to run sub-20.',
+  sessions:[
+   {day:'Tuesday',  type:'interval', workout:'W/U 1.5km \u00b7 4\u00d71km @3:58/km (2 min jog) \u00b7 C/D 1km', km:7.5, optional:false, tip:'Sub-race-pace 1km reps. Finish strong and feeling fast.'},
+   {day:'Wednesday',type:'easy',     workout:'6 km easy (optional)', km:6, optional:true, tip:'Optional. Begin winding down mentally as much as physically.'},
+   {day:'Friday',   type:'easy',     workout:'6 km easy', km:6, optional:false, tip:'Easy run. Last regular Friday run of the plan.'},
+   {day:'Sunday',   type:'long',     workout:'11 km easy', km:11, optional:false, tip:'Last proper long run. You\'re nearly there.'}
+  ]},
+ {n:17,phase:'taper',focus:'Taper Week',totalKm:22,cutback:false,
+  injuryFlag:null,
+  note:'<strong>Taper time.</strong> Volume drops significantly. Taper madness is real and completely normal. <strong>Do not add extra running.</strong> Sleep well. Eat well. Stay calm.',
+  sessions:[
+   {day:'Tuesday',  type:'interval', workout:'W/U 1km \u00b7 4\u00d7400m @3:55/km (90s jog) \u00b7 C/D 1km', km:5, optional:false, tip:'Short, sharp, snappy. These wake your legs up without tiring them.'},
+   {day:'Wednesday',type:'easy',     workout:'5\u20136 km easy (optional)', km:5, optional:true, tip:'Very short and easy if you go.'},
+   {day:'Friday',   type:'easy',     workout:'4 km easy', km:4, optional:false, tip:'Short easy run. One week to go.'},
+   {day:'Sunday',   type:'long',     workout:'8 km easy', km:8, optional:false, tip:'Short relaxed run. You are ready.'}
+  ]},
+ {n:18,phase:'taper',focus:'Race Week \uD83C\uDFC1',totalKm:19,cutback:false,
+  injuryFlag:null,
+  note:'<strong>This is it.</strong> Tuesday is your final confidence check. Wednesday is a gentle shake-out. Friday is optional. <strong>Race strategy: start at exactly 4:00/km. Hold form through 3km. Push from 3km. Give everything in the final kilometre.</strong>',
+  sessions:[
+   {day:'Tuesday',  type:'interval', workout:'W/U 1km \u00b7 3\u00d71km @3:58/km (2 min jog) \u00b7 C/D 1km', km:5, optional:false, tip:'Final sharpener. Race-pace reps \u2014 should feel comfortable and fast.'},
+   {day:'Wednesday',type:'easy',     workout:'4\u20135 km very easy shake-out', km:4.5, optional:false, tip:'Gentle shake-out. Conversational pace or slower. Visualise the race.'},
+   {day:'Friday',   type:'easy',     workout:'20 min easy jog or full rest', km:4, optional:true, tip:'Do what makes you feel best. Trust your instincts.'},
+   {day:'Sunday',   type:'race',     workout:'5K RACE \u2014 TARGET: SUB 20:00', km:5, optional:false, tip:'Start at 4:00/km. Hold it. Push from 3km. Everything in the last km. This is your moment.'}
+  ]}
+];
+
+var PHASES = {
+  base:    {label:'Base Building', color:'#3dffa0'},
+  build:   {label:'Build Phase',   color:'#ff7c3a'},
+  sharpen: {label:'Sharpening',    color:'#5b9fff'},
+  taper:   {label:'Taper & Race',  color:'#ffe44a'}
+};
+
+// ── STATE ──
+var completed = {};
+var prehabDone = {}; // key: 'YYYY-MM-DD:itemId'
+var streakData = {}; // key: 'YYYY-MM-DD' = true if all prehab done that day
+
+try { var s = localStorage.getItem('sub20v6'); if (s) { var parsed = JSON.parse(s); completed = parsed.completed||{}; prehabDone = parsed.prehabDone||{}; streakData = parsed.streakData||{}; } } catch(e) {}
+
+function save() {
+  try { localStorage.setItem('sub20v6', JSON.stringify({completed:completed, prehabDone:prehabDone, streakData:streakData})); } catch(e) {}
+}
+function sKey(wn,si) { return 'w'+wn+'s'+si; }
+function isDone(wn,si) { return completed[sKey(wn,si)]===true; }
+function toggle(wn,si) {
+  var k=sKey(wn,si);
+  if (isDone(wn,si)) { delete completed[k]; } else { completed[k]=true; }
+  save(); updateRing(); render();
+}
+function totalSessions() { return WEEKS.reduce(function(a,w){return a+w.sessions.length;},0); }
+function doneSessions()  { return Object.keys(completed).filter(function(k){return completed[k]===true;}).length; }
+function currentWeek() {
+  for (var i=0;i<WEEKS.length;i++) {
+    if (!WEEKS[i].sessions.every(function(_,si){return isDone(i+1,si);})) return i+1;
+  }
+  return 18;
+}
+
+// ── PREHAB TICK ──
+function todayStr() {
+  var now = new Date();
+  return now.getFullYear()+'-'+(now.getMonth()+1<10?'0':'')+(now.getMonth()+1)+'-'+(now.getDate()<10?'0':'')+now.getDate();
+}
+function phKey(itemId) { return todayStr()+':'+itemId; }
+function isPrehDone(itemId) { return prehabDone[phKey(itemId)]===true; }
+function togglePrehab(itemId, dayName) {
+  var k = phKey(itemId);
+  if (prehabDone[k]) { delete prehabDone[k]; } else { prehabDone[k]=true; }
+  // check if all today's prehab is done
+  var todayItems = getPrehab(dayName);
+  var allDone = todayItems.every(function(p){ return prehabDone[todayStr()+':'+p.id]===true; });
+  if (allDone) { streakData[todayStr()]=true; } else { delete streakData[todayStr()]; }
+  save(); render();
+}
+
+// ── STREAK ──
+function calcStreak() {
+  var streak = 0;
+  var d = new Date(); d.setHours(0,0,0,0);
+  while (true) {
+    var key = d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'-'+(d.getDate()<10?'0':'')+d.getDate();
+    if (!streakData[key]) break;
+    streak++;
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+
+// ── RING & COUNTDOWN ──
+function updateRing() {
+  var pct = Math.round(doneSessions()/totalSessions()*100);
+  var circ = 113.1;
+  document.getElementById('ringBar').style.strokeDashoffset = circ - circ*pct/100;
+  document.getElementById('ringPct').textContent = pct+'%';
+}
+function updateCountdown() {
+  var diff = Math.ceil((RACE - new Date()) / 86400000);
+  document.getElementById('daysLeft').textContent = diff > 0 ? diff : '\uD83C\uDFC1';
+}
+
+// ── TABS ──
+var activeTab = 'today';
+var selWeek = null;
+
+function switchTab(tab, wn) {
+  activeTab = tab;
+  if (wn) selWeek = wn;
+  if (tab === 'week' && !selWeek) selWeek = currentWeek();
+  document.querySelectorAll('.tab').forEach(function(t,i) {
+    t.classList.toggle('active', ['today','overview','week','prehab'][i]===tab);
+  });
+  ['today','overview','week','prehab'].forEach(function(t) {
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+  });
+  window.scrollTo(0,0);
+  render();
+}
+
+function render() {
+  if (activeTab==='today') renderToday();
+  else if (activeTab==='overview') renderOverview();
+  else if (activeTab==='week') renderWeek(selWeek);
+  else renderPrehab();
+}
+
+// ── TODAY TAB ──
+function renderToday() {
+  var now = new Date();
+  var dayName = DAY_NAMES[now.getDay()];
+  var wn = trainingWeekOf(now);
+  var tStr = todayStr();
+
+  // ── RACE DAY SURPRISE ──
+  var isRaceDay = (tStr === '2026-06-28');
+  if (isRaceDay) { renderRaceDay(); return; }
+
+  // ── BEFORE PLAN STARTS ──
+  if (wn === 0) {
+    document.getElementById('tab-today').innerHTML =
+      '<div class="today-header"><div class="today-date-block">'
+      +'<div class="today-dayname">'+dayName.toUpperCase()+'</div>'
+      +'<div class="today-datestr">'+fmtDate(now)+'</div></div>'
+      +'<div class="today-week-badge"><div class="wbig">9</div><div class="wsmall">days to start</div></div></div>'
+      +'<div class="rest-day-card"><span class="rest-day-icon">🗓️</span>'
+      +'<div class="rest-day-title">PLAN STARTS 9 MAR</div>'
+      +'<div class="rest-day-sub">Use this time to nail your prehab daily routine and get your bands sorted.</div></div>';
+    return;
+  }
+
+  var w = WEEKS[wn-1];
+  var phaseColor = PHASES[w.phase].color;
+
+  // Find today's session (if any)
+  var todaySession = null;
+  var todaySessionIdx = -1;
+  w.sessions.forEach(function(s,i) {
+    if (s.day === dayName) { todaySession = s; todaySessionIdx = i; }
+  });
+
+  // Header
+  var html = '<div class="today-header">'
+    +'<div class="today-date-block">'
+    +'<div class="today-dayname">'+dayName.toUpperCase()+'</div>'
+    +'<div class="today-datestr">'+fmtDate(now)+'</div>'
+    +'</div>'
+    +'<div class="today-week-badge">'
+    +'<div class="wbig" style="color:'+phaseColor+'">W'+wn+'</div>'
+    +'<div class="wsmall">'+w.focus+'</div>'
+    +'</div>'
+    +'</div>';
+
+  // Streak bar
+  var streak = calcStreak();
+  var streakDots = '';
+  for (var di=6; di>=0; di--) {
+    var pd = new Date(); pd.setDate(pd.getDate()-di); pd.setHours(0,0,0,0);
+    var pdKey = pd.getFullYear()+'-'+(pd.getMonth()+1<10?'0':'')+(pd.getMonth()+1)+'-'+(pd.getDate()<10?'0':'')+pd.getDate();
+    var isToday = (di===0);
+    var hasDone = streakData[pdKey];
+    streakDots += '<div class="sd'+(hasDone?(isToday?' today-on':' on'):'')+'"></div>';
+  }
+  html += '<div class="streak-bar">'
+    +'<div class="streak-flame">'+(streak>0?'🔥':'🌑')+'</div>'
+    +'<div class="streak-text">'
+    +'<div class="streak-num">'+streak+' day'+(streak===1?'':'s')+'</div>'
+    +'<div class="streak-lbl">prehab streak</div>'
+    +'</div>'
+    +'<div class="streak-dots">'+streakDots+'</div>'
+    +'</div>';
+
+  // Running session
+  if (todaySession) {
+    var done = isDone(wn, todaySessionIdx);
+    var typeLabel = todaySession.type==='long' ? 'long run' : todaySession.type;
+    var badgeType = todaySession.type==='long' ? 'long' : todaySession.type;
+    var optBadge = todaySession.optional ? '<span class="badge-opt">Optional</span>' : '';
+    html += '<div class="today-section-label">Today\'s Run</div>';
+    html += '<div class="session-card'+(done?' s-done':'')+(todaySession.optional?' s-optional':'')+'">'
+      +'<div class="s-row">'
+      +'<div class="s-body">'
+      +'<div class="s-badges"><span class="s-badge badge-'+badgeType+'">'+typeLabel+'</span>'+optBadge+'</div>'
+      +'<div class="s-day">'+todaySession.day+'</div>'
+      +'<div class="s-workout">'+todaySession.workout+'</div>'
+      +'<div class="s-km">~'+todaySession.km+' km this session</div>'
+      +'</div>'
+      +'<button class="tick-btn'+(done?' ticked':'')+'" onclick="toggle('+wn+','+todaySessionIdx+')">'+(done?'\u2713':'\u25cb')+'</button>'
+      +'</div>'
+      +'<div class="s-tip">'+todaySession.tip+'</div>'
+      +'</div>';
+  } else {
+    html += '<div class="rest-day-card">'
+      +'<span class="rest-day-icon">😴</span>'
+      +'<div class="rest-day-title">REST DAY</div>'
+      +'<div class="rest-day-sub">No run today. Recover well \u2014 fitness is built during rest, not training. Do your prehab below.</div>'
+      +'</div>';
+  }
+
+  // Injury flag if this week has one and it's a run day or Monday
+  if (w.injuryFlag && (todaySession || dayName==='Monday')) {
+    html += '<div class="injury-flag"><div class="flag-icon">\u26a0\ufe0f</div><div class="flag-text">'+w.injuryFlag+'</div></div>';
+  }
+
+  // Prehab section
+  var todayPrehab = getPrehab(dayName);
+  var allPrehabDone = todayPrehab.every(function(p){ return isPrehDone(p.id); });
+
+  html += '<div class="today-section-label">Today\'s Prehab</div>';
+
+  if (allPrehabDone) {
+    html += '<div class="prehab-all-done">'
+      +'<span class="prehab-all-done-icon">✅</span>'
+      +'<div class="prehab-all-done-text">All prehab done today!</div>'
+      +'</div>';
+  }
+
+  todayPrehab.forEach(function(p) {
+    var chk = isPrehDone(p.id);
+    var badgeCls = 'pcb-'+p.priority;
+    var badgeLabel = p.priority==='critical'?'Critical':p.priority==='high'?'High':'Daily';
+    html += '<div class="prehab-check-item'+(chk?' checked':'')+'" onclick="togglePrehab(\''+p.id+'\',\''+dayName+'\')">'
+      +'<div class="pci-tick">'+(chk?'\u2713':'')+'</div>'
+      +'<div class="pci-body">'
+      +'<div class="pci-name">'+p.name+'</div>'
+      +'<div class="pci-detail">'+p.detail+'</div>'
+      +'</div>'
+      +'<span class="pci-badge '+badgeCls+'">'+badgeLabel+'</span>'
+      +'</div>';
+  });
+
+  document.getElementById('tab-today').innerHTML = html;
+}
+
+// ── RACE DAY ──
+function renderRaceDay() {
+  var raceDone = completed['raceday']===true;
+  var html = '<div class="race-day-full">'
+    +'<div class="rdf-stars">⭐ ⭐ ⭐ ⭐ ⭐</div>'
+    +'<div class="rdf-big">RACE DAY</div>'
+    +'<div class="rdf-sub">28 June 2026 · Sub-20 5K</div>'
+
+    +'<div class="rdf-card">'
+    +'<div class="rdf-card-title">🎯 Race Strategy</div>'
+    +'<div class="rdf-card-body">'
+    +'Start at <strong>exactly 4:00/km</strong>. Not 3:55. The crowd and adrenaline will try to drag you out fast \u2014 resist it. Lock in 4:00 and run your own race.<br><br>'
+    +'<strong>0\u20133km:</strong> Hold 4:00/km. Breathe. Settle. It should feel almost too easy for the first kilometre.<br><br>'
+    +'<strong>3\u20134km:</strong> This is where you push. If you\'ve paced it right, you have something left. Drive your arms. Stay tall.<br><br>'
+    +'<strong>Final km:</strong> <strong>Everything.</strong> Leave nothing on the course.'
+    +'</div></div>'
+
+    +'<div class="rdf-card">'
+    +'<div class="rdf-card-title">⏱ Target Splits</div>'
+    +'<div class="rdf-splits">'
+    +'<div class="rdf-split"><span class="km">1km</span><span class="pace">4:00</span></div>'
+    +'<div class="rdf-split"><span class="km">2km</span><span class="pace">4:00</span></div>'
+    +'<div class="rdf-split"><span class="km">3km</span><span class="pace">4:00</span></div>'
+    +'<div class="rdf-split key"><span class="km">4km</span><span class="pace">3:55</span></div>'
+    +'<div class="rdf-split key"><span class="km">5km</span><span class="pace">3:50</span></div>'
+    +'</div>'
+    +'<div class="rdf-card-body" style="font-size:0.75rem;color:#5a6a85">Target finish: 19:45 \u2014 15 seconds of breathing room.</div>'
+    +'</div>'
+
+    +'<div class="rdf-card">'
+    +'<div class="rdf-card-title">💭 Remember</div>'
+    +'<div class="rdf-card-body">'
+    +'You have done <strong>18 weeks of work</strong>. You have run intervals in the rain, done prehab on the sofa, protected an injury that once stopped you walking. '
+    +'You earned this start line. The fitness is there \u2014 your only job today is to express it.<br><br>'
+    +'<strong>Go get it.</strong>'
+    +'</div></div>'
+
+    +'<button class="race-done-btn'+(raceDone?' done':'')+'" onclick="toggleRaceDone()">'
+    +(raceDone?'🏆 SUB-20 DONE!':'Mark Race Complete')
+    +'</button>'
+    +'</div>';
+
+  document.getElementById('tab-today').innerHTML = html;
+}
+
+function toggleRaceDone() {
+  if (completed['raceday']) { delete completed['raceday']; } else { completed['raceday']=true; }
+  save(); render();
+}
+
+// ── OVERVIEW ──
+function renderOverview() {
+  var cw = currentWeek();
+  var html = '<div class="stat-strip">'
+    +'<div class="stat-box"><span class="stat-val">'+doneSessions()+'</span><span class="stat-lbl">Done</span></div>'
+    +'<div class="stat-box"><span class="stat-val">'+cw+'</span><span class="stat-lbl">Week</span></div>'
+    +'<div class="stat-box"><span class="stat-val">'+Math.max(0,19-cw)+'</span><span class="stat-lbl">Left</span></div>'
+    +'<div class="stat-box"><span class="stat-val">18</span><span class="stat-lbl">Total</span></div>'
+    +'</div>';
+  var lastPhase='';
+  WEEKS.forEach(function(w) {
+    if (w.phase!==lastPhase) {
+      var p=PHASES[w.phase];
+      html+='<div class="phase-header"><div class="phase-pip" style="background-color:'+p.color+'"></div><span class="phase-lbl" style="color:'+p.color+'">'+p.label+'</span><div class="phase-rule"></div></div>';
+      lastPhase=w.phase;
+    }
+    var allDone=w.sessions.every(function(_,si){return isDone(w.n,si);});
+    var isCur=w.n===currentWeek()&&!allDone;
+    var dots=w.sessions.map(function(s,si){var d=isDone(w.n,si)?' d-done':'';return '<div class="dot d-'+s.type+d+'"></div>';}).join('');
+    var rec=w.cutback?'<span class="recovery-badge">Recovery</span>':'';
+    html+='<div class="week-row'+(allDone?' wk-done':'')+(isCur?' wk-current':'')+'" onclick="switchTab(\'week\','+w.n+')">'
+      +'<div class="wk-num">'+(w.n<10?'0':'')+w.n+'</div>'
+      +'<div class="wk-info"><div class="wk-focus">'+w.focus+rec+'</div><div class="wk-date">'+weekRange(w.n)+'</div></div>'
+      +'<div class="wk-right"><div class="wk-km">'+w.totalKm+' km</div><div class="wk-dots">'+dots+'</div></div>'
+      +'<div class="wk-arrow">\u203a</div>'
+      +'</div>';
+  });
+  document.getElementById('tab-overview').innerHTML=html;
+}
+
+// ── WEEK DETAIL ──
+function renderWeek(wn) {
+  var w=WEEKS[wn-1], pc=PHASES[w.phase].color, pl=PHASES[w.phase].label;
+  var pills=w.sessions.map(function(s,si){var d=isDone(wn,si);return '<div class="km-pill'+(d?' done':'')+'">'+s.day.slice(0,3)+': '+s.km+'km</div>';}).join('');
+  var html='<button class="back-btn" onclick="switchTab(\'overview\')">\u2039 All Weeks</button>'
+    +'<div class="week-nav"><button class="nav-btn" onclick="switchTab(\'week\','+(wn-1)+')" '+(wn===1?'disabled':'')+'">\u2039 Prev</button><div class="nav-lbl">Week '+wn+' / 18</div><button class="nav-btn" onclick="switchTab(\'week\','+(wn+1)+')" '+(wn===18?'disabled':'')+'">Next \u203a</button></div>'
+    +'<div class="week-summary"><div class="ws-top"><div><div class="ws-phase" style="color:'+pc+'">'+pl+(w.cutback?' \u00b7 Recovery':'')+'</div><div class="ws-title">'+w.focus+'</div><div class="ws-date">'+weekRange(wn)+'</div></div><div class="ws-km"><div class="ws-km-val">'+w.totalKm+'</div><div class="ws-km-lbl">km target</div></div></div><div class="coach-note">'+w.note+'</div></div>'
+    +'<div class="km-pills">'+pills+'</div>';
+  if (w.injuryFlag) html+='<div class="injury-flag"><div class="flag-icon">\u26a0\ufe0f</div><div class="flag-text">'+w.injuryFlag+'</div></div>';
+  w.sessions.forEach(function(s,si) {
+    var done=isDone(wn,si);
+    if (s.type==='race') {
+      html+='<div class="race-banner"><span class="race-emoji">\uD83C\uDFC1</span><div class="race-title">RACE DAY</div><div class="race-sub">'+s.workout+'<br><br>'+s.tip+'</div><button class="race-tick'+(done?' ticked':'')+'" onclick="toggle('+wn+','+si+')">'+(done?'\u2713':'\u25cb')+'</button></div>';
+      return;
+    }
+    var tl=s.type==='long'?'long run':s.type, bt=s.type==='long'?'long':s.type;
+    var ob=s.optional?'<span class="badge-opt">Optional</span>':'';
+    html+='<div class="session-card'+(done?' s-done':'')+(s.optional?' s-optional':'')+'">'
+      +'<div class="s-row"><div class="s-body"><div class="s-badges"><span class="s-badge badge-'+bt+'">'+tl+'</span>'+ob+'</div><div class="s-day">'+s.day+'</div><div class="s-workout">'+s.workout+'</div><div class="s-km">~'+s.km+' km this session</div></div>'
+      +'<button class="tick-btn'+(done?' ticked':'')+'" onclick="toggle('+wn+','+si+')">'+(done?'\u2713':'\u25cb')+'</button></div>'
+      +'<div class="s-tip">'+s.tip+'</div></div>';
+  });
+  html+='<div class="gym-card"><div class="gym-head"><span>💪</span><span class="gym-head-title">Gym & Prehab This Week</span><span class="gym-head-sub">'+(w.phase==='taper'?'Reduce weights 20%':'Full programme')+'</span></div>'
+    +'<div class="gym-sec">Tuesday & Thursday \u2014 Full Body + Prehab</div>'
+    +gymItem('Single-leg calf raises (straight + bent knee)','3\u00d715 each leg, slow tempo \u2014 non-negotiable')
+    +gymItem('Tibialis posterior band work','3\u00d715 each leg \u2014 your single most important exercise')
+    +gymItem('Single-leg Romanian deadlift','3\u00d710 each leg \u2014 posterior chain strength')
+    +'<div class="gym-sec">Friday \u2014 Prehab Focus</div>'
+    +gymItem('Tibialis anterior band work','3\u00d715 each leg \u2014 shin splint prevention')
+    +gymItem('Foot doming / short foot exercise','10\u00d75s holds each foot \u2014 arch rebuilding')
+    +'<div class="gym-sec">Daily \u2014 5 Minutes Every Day</div>'
+    +gymItem('Soleus stretch (bent knee) + gastrocnemius stretch','3\u00d745s each side, each stretch \u2014 every single day')
+    +gymItem('Tibialis posterior band work on sofa','3\u00d715 each leg \u2014 evening routine while watching TV')
+    +'</div>';
+  document.getElementById('tab-week').innerHTML=html;
+}
+function gymItem(n,d) { return '<div class="gym-item"><div class="gym-item-name">'+n+'</div><div class="gym-item-detail">'+d+'</div></div>'; }
+
+// ── PREHAB TAB ──
+var PREHAB_FULL = [
+  {icon:'🦵',title:'Single-Leg Calf Raise \u2014 Straight Leg',sets:'3\u00d715 reps per leg \u00b7 3-3-3 slow tempo',priority:'critical',lab:'Critical',why:'Directly loads and remodels the Achilles tendon. Slow tempo is non-negotiable \u2014 tendons respond to slow heavy load, not fast reps.',when:'Tue & Thu gym. Progress to single-leg off a step once 3\u00d715 feels easy.'},
+  {icon:'🦵',title:'Single-Leg Calf Raise \u2014 Bent Knee (Soleus)',sets:'3\u00d715 reps per leg \u00b7 slow tempo',priority:'critical',lab:'Critical',why:'The soleus is only properly loaded with a bent knee. Primary decelerator of the foot and major Achilles protector.',when:'Tue & Thu. Do immediately after the straight-leg version.'},
+  {icon:'🦶',title:'Tibialis Posterior Band Work',sets:'3\u00d715 reps per leg \u00b7 controlled',priority:'critical',lab:'Critical',why:'The ONLY exercise that directly targets your post-tib muscle. Non-negotiable every session \u2014 and ideal on the sofa every evening.',when:'All gym sessions (Tue/Thu/Fri) + daily on sofa. Sit, band around foot, rotate foot inward against resistance.'},
+  {icon:'🦶',title:'Foot Doming / Short Foot',sets:'10\u00d75 second holds \u00b7 each foot \u00b7 daily',priority:'daily',lab:'Daily',why:'Activates intrinsic foot muscles that support your medial arch, directly reducing post-tib tendon load.',when:'Every day. Morning is ideal. Draw ball of foot toward heel without curling toes.'},
+  {icon:'🏋️',title:'Single-Leg Romanian Deadlift',sets:'3\u00d710 per leg \u00b7 light to moderate weight',priority:'high',lab:'High Priority',why:'Trains the entire posterior chain in single-leg stance. Strengthens glutes and hamstrings which absorb load that would otherwise go through your post-tib.',when:'Tue & Thu gym sessions.'},
+  {icon:'💪',title:'Tibialis Anterior Band Work',sets:'3\u00d715 reps per leg',priority:'high',lab:'High Priority',why:'Balances the calf complex, directly reduces shin splint risk. Sit in a chair, band over foot, lift foot upward against resistance.',when:'Friday gym session.'},
+  {icon:'🧘',title:'Soleus Stretch \u2014 Bent Knee',sets:'3\u00d745 seconds \u00b7 each side',priority:'daily',lab:'Daily',why:'Chronically tight in runners and directly increases Achilles tendon load. Back foot close to wall, bend back knee toward wall keeping heel flat.',when:'Daily, especially before bed.'},
+  {icon:'🧘',title:'Gastrocnemius Stretch \u2014 Straight Leg',sets:'3\u00d745 seconds \u00b7 each side',priority:'daily',lab:'Daily',why:'Maintains length in the gastrocnemius, reducing Achilles load. Classic wall stretch \u2014 straight back leg, heel flat.',when:'Daily. Do both stretches together every day.'}
+];
+function renderPrehab() {
+  var html='<div class="prehab-intro"><h2>Injury Prevention Plan</h2><p>Built around your specific history: posterior tibial tendon dysfunction and Achilles sensitivity. The post-tib band work and calf raises are non-negotiable \u2014 they\'re what gets you to the start line healthy.</p></div>'
+    +'<div class="warn-box"><h3>\uD83D\uDD34 Stop Running If You Have...</h3>'
+    +warnItem('Sharp or aching pain behind the medial malleolus (inner ankle bone) during or after a run')
+    +warnItem('Pain that worsens during a run rather than warming up and settling within 5\u201310 minutes')
+    +warnItem('Visible swelling around the inside of the ankle')
+    +warnItem('Morning Achilles stiffness lasting more than 10\u201315 minutes')
+    +warnItem('Post-tib tenderness that doesn\'t settle within 24 hours of a run')
+    +'</div>';
+  html+='<div class="prehab-sec-label">\uD83D\uDD34 Critical \u2014 Every Gym Session</div>';
+  PREHAB_FULL.filter(function(e){return e.priority==='critical';}).forEach(function(e){html+=exCard(e);});
+  html+='<div class="prehab-sec-label">\uD83D\uDFE1 High Priority \u2014 Weekly</div>';
+  PREHAB_FULL.filter(function(e){return e.priority==='high';}).forEach(function(e){html+=exCard(e);});
+  html+='<div class="prehab-sec-label">\uD83D\uDFE2 Daily \u2014 5 Minutes Every Day</div>';
+  PREHAB_FULL.filter(function(e){return e.priority==='daily';}).forEach(function(e){html+=exCard(e);});
+  html+='<div class="gym-sched"><h3>\uD83D\uDCC5 Weekly Gym Integration</h3>'
+    +'<div class="gs-day"><div class="gs-day-label">Tuesday & Thursday \u2014 Full Body</div><div class="gs-day-items">Your existing full-body session<br>+ Single-leg calf raises (straight) 3\u00d715<br>+ Single-leg calf raises (bent knee) 3\u00d715<br>+ Post-tib band work 3\u00d715<br>+ Single-leg RDL 3\u00d710</div></div>'
+    +'<div class="gs-day"><div class="gs-day-label">Friday \u2014 Everything Else + Prehab</div><div class="gs-day-items">Your existing session<br>+ Tibialis anterior band work 3\u00d715<br>+ Foot doming 10\u00d75s holds<br>+ Soleus + gastroc stretches</div></div>'
+    +'<div class="gs-day"><div class="gs-day-label">Daily \u2014 5 Minutes (Sofa/Morning)</div><div class="gs-day-items">Post-tib band work 3\u00d715 each leg<br>Soleus stretch 3\u00d745s each side<br>Gastrocnemius stretch 3\u00d745s each side<br>Foot doming 10\u00d75s each foot</div></div>'
+    +'</div>';
+  document.getElementById('tab-prehab').innerHTML=html;
+}
+function exCard(e) {
+  return '<div class="ex-card"><div class="ex-card-top"><div class="ex-icon">'+e.icon+'</div><div class="ex-info"><div class="ex-title">'+e.title+'</div><div class="ex-sets">'+e.sets+'</div></div><span class="ex-badge '+e.priority+'">'+e.lab+'</span></div><div class="ex-why">'+e.why+'</div><div class="ex-when">\uD83D\uDCC5 '+e.when+'</div></div>';
+}
+function warnItem(t) { return '<div class="warn-item">'+t+'</div>'; }
+
+// ── INIT ──
+updateRing();
+updateCountdown();
+setInterval(updateCountdown, 60000);
+renderToday();
+</script>
+
+</body>
+</html>
